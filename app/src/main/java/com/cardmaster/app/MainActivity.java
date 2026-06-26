@@ -1,0 +1,297 @@
+package com.cardmaster.app;
+
+import android.content.Context;
+import android.content.res.Configuration;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+
+import com.cardmaster.app.databinding.ActivityMainBinding;
+import com.cardmaster.app.data.entity.UserCurrency;
+import com.cardmaster.app.data.preferences.UserPreferencesManager;
+import com.cardmaster.app.ui.ajout.AjoutFragment;
+import com.cardmaster.app.ui.compte.CompteFragment;
+import com.cardmaster.app.ui.boosteropening.BoosterOpeningFragment;
+import com.cardmaster.app.ui.cardreveal.CardRevealFragment;
+import com.cardmaster.app.ui.collection.CollectionFragment;
+import com.cardmaster.app.ui.home.HomeFragment;
+import com.cardmaster.app.ui.login.LoginFragment;
+import com.cardmaster.app.ui.marche.MarcheFragment;
+import com.cardmaster.app.ui.splash.SplashFragment;
+import com.cardmaster.app.data.entity.Card;
+import com.cardmaster.app.work.WorkManagerHelper;
+
+import java.util.Locale;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements
+        SplashFragment.NavigationListener,
+        LoginFragment.NavigationListener,
+        HomeFragment.BoosterClickListener,
+        BoosterOpeningFragment.BoosterOpenListener,
+        CardRevealFragment.CardRevealListener {
+
+    private ActivityMainBinding binding;
+    private NavController navController;
+    private boolean isMainNavigationVisible = false;
+    private TextView tokenCountText;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        // Load language synchronously from SharedPreferences
+        android.content.SharedPreferences prefs = newBase.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String language = prefs.getString("language", "en");
+
+        Locale locale = new Locale(language);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration(newBase.getResources().getConfiguration());
+        config.setLocale(locale);
+        Context context = newBase.createConfigurationContext(config);
+        super.attachBaseContext(context);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        tokenCountText = binding.tokenDisplay.tokenCount;
+        setupNavigation();
+        setupBottomNavigation();
+        observeTokenCount();
+
+        if (savedInstanceState == null) {
+            showSplashFragment();
+        } else {
+            // Restore the current tab after recreate
+            showBottomNavigation();
+            binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+            int currentItemId = binding.bottomNavigation.getSelectedItemId();
+            if (currentItemId != 0) {
+                binding.bottomNavigation.setSelectedItemId(currentItemId);
+            } else {
+                // Default to Home if no item selected
+                binding.bottomNavigation.setSelectedItemId(R.id.navigation_home);
+            }
+        }
+    }
+
+    private void setupNavigation() {
+        // Don't try to find NavHostFragment - we're using manual fragment management
+    }
+
+    private void setupBottomNavigation() {
+        binding.bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.navigation_compte) {
+                showFragment(new CompteFragment());
+                binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+                return true;
+            } else if (itemId == R.id.navigation_marche) {
+                showFragment(new MarcheFragment());
+                binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+                return true;
+            } else if (itemId == R.id.navigation_home) {
+                showFragment(new HomeFragment());
+                binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+                return true;
+            } else if (itemId == R.id.navigation_collection) {
+                showFragment(new CollectionFragment());
+                binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+                return true;
+            } else if (itemId == R.id.navigation_ajout) {
+                showFragment(new AjoutFragment());
+                binding.tokenDisplay.getRoot().setVisibility(View.GONE);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void showSplashFragment() {
+        hideBottomNavigation();
+        binding.tokenDisplay.getRoot().setVisibility(View.GONE);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, new SplashFragment())
+                .commit();
+    }
+
+    private void showFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, fragment)
+                .commit();
+    }
+
+    private void showBottomNavigation() {
+        binding.bottomNavigation.setVisibility(View.VISIBLE);
+        isMainNavigationVisible = true;
+    }
+
+    private void hideBottomNavigation() {
+        binding.bottomNavigation.setVisibility(View.GONE);
+        isMainNavigationVisible = false;
+    }
+
+    private void observeTokenCount() {
+        CardMasterApplication app = CardMasterApplication.getInstance();
+        app.getUserCurrencyRepository().getUserCurrency().observe(this, new Observer<UserCurrency>() {
+            @Override
+            public void onChanged(UserCurrency userCurrency) {
+                if (userCurrency != null && tokenCountText != null) {
+                    tokenCountText.setText(String.valueOf(userCurrency.getTokens()));
+                }
+            }
+        });
+    }
+
+    @Override
+    public void navigateToLogin() {
+        hideBottomNavigation();
+        binding.tokenDisplay.getRoot().setVisibility(View.GONE);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, new LoginFragment())
+                .commit();
+    }
+
+    @Override
+    public void navigateToMain() {
+        showBottomNavigation();
+        binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, new HomeFragment())
+                .commit();
+        // Set selected item to Home to ensure correct tab is shown
+        binding.bottomNavigation.setSelectedItemId(R.id.navigation_home);
+    }
+
+    @Override
+    public void onBoosterClicked(int boosterId) {
+        CardMasterApplication app = CardMasterApplication.getInstance();
+        com.cardmaster.app.data.entity.BoosterCharge boosterCharge = app.getBoosterChargeRepository().getBoosterChargeSync();
+        
+        android.util.Log.d("MainActivity", "Booster clicked. Current charge: " + (boosterCharge != null ? boosterCharge.getCurrentCharge() : "null"));
+        
+        if (boosterCharge != null && boosterCharge.getCurrentCharge() > 0) {
+            binding.tokenDisplay.getRoot().setVisibility(View.GONE);
+            BoosterOpeningFragment fragment = BoosterOpeningFragment.newInstance(boosterId);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.nav_host_fragment, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        } else {
+            android.util.Log.d("MainActivity", "Cannot open booster - no charges available");
+            android.widget.Toast.makeText(this, getString(R.string.home_no_openings_available), android.widget.Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onBoosterOpened(List<Card> cards) {
+        // Save cards immediately when booster opens and calculate token gains for duplicates
+        android.util.Log.d("MainActivity", "onBoosterOpened - saving " + (cards != null ? cards.size() : 0) + " cards immediately");
+        CardMasterApplication app = CardMasterApplication.getInstance();
+        long currentTime = System.currentTimeMillis();
+        java.util.Map<Integer, Integer> tokenGains = new java.util.HashMap<>();
+
+        // Decrement booster charge
+        app.getBoosterChargeRepository().useBooster();
+
+        for (Card card : cards) {
+            // Check if card already exists BEFORE inserting
+            int currentQuantity = app.getOwnedCardRepository().getOwnedCardDao().getQuantityByCardIdSync(card.getId());
+            boolean isDuplicate = currentQuantity > 0;
+
+            android.util.Log.d("MainActivity", "Saving card with ID: " + card.getId() + ", current quantity: " + currentQuantity + ", isDuplicate: " + isDuplicate);
+
+            com.cardmaster.app.data.entity.OwnedCard ownedCard =
+                new com.cardmaster.app.data.entity.OwnedCard(card.getId(), currentTime, 1);
+            app.getOwnedCardRepository().insertOwnedCard(ownedCard);
+
+            // If it was a duplicate, calculate and add tokens
+            if (isDuplicate) {
+                // Calculate token gain: (rarity + upgrade)^4
+                try {
+                    int rarity = Integer.parseInt(card.getRarity());
+                    int upgrade = card.getNumber();
+                    int tokenGain = (int) Math.pow(rarity + upgrade, 4);
+                    android.util.Log.d("MainActivity", "Duplicate card! Adding " + tokenGain + " tokens for card ID: " + card.getId());
+                    app.getUserCurrencyRepository().addTokens(tokenGain);
+                    tokenGains.put(card.getId(), tokenGain);
+                } catch (NumberFormatException e) {
+                    android.util.Log.e("MainActivity", "Error calculating token gain for card ID: " + card.getId());
+                }
+            }
+        }
+
+        CardRevealFragment fragment = CardRevealFragment.newInstance(cards, tokenGains);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void onContinue(List<Card> cards) {
+        // Cards are already saved in onBoosterOpened, just navigate back to home
+        android.util.Log.d("MainActivity", "onContinue called - navigating back to home");
+        getSupportFragmentManager().popBackStack();
+        getSupportFragmentManager().popBackStack(); // Go back to home
+        // Don't set selected item here to avoid navigation conflicts
+        binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Schedule background work to check booster charge when app goes to background
+        scheduleBoosterChargeCheck();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Cancel background work when app comes to foreground (timer will handle it)
+        WorkManagerHelper.cancelBoosterChargeCheck(this);
+    }
+
+    private void scheduleBoosterChargeCheck() {
+        CardMasterApplication app = CardMasterApplication.getInstance();
+        com.cardmaster.app.data.entity.BoosterCharge boosterCharge = app.getBoosterChargeRepository().getBoosterChargeSync();
+        
+        if (boosterCharge != null && boosterCharge.getCurrentCharge() < boosterCharge.getMaxCharge()) {
+            // Schedule periodic work to check booster charge every 15 minutes
+            WorkManagerHelper.scheduleBoosterChargeCheck(this);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding = null;
+    }
+
+    public void changeLanguage(String languageCode) {
+        // Check if language actually changed
+        CardMasterApplication app = CardMasterApplication.getInstance();
+        android.content.SharedPreferences prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String currentLang = prefs.getString("language", "en");
+
+        if (languageCode.equals(currentLang)) {
+            return; // Language hasn't changed, do nothing
+        }
+
+        // Save new language
+        app.getPreferencesManager().saveLanguage(languageCode);
+
+        // Recreate activity to apply new language
+        recreate();
+    }
+}

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ethos</string>
+    
+    <!-- Splash -->
+    <string name="splash_title">Ethos</string>
+    
+    <!-- Login -->
+    <string name="login_title">Bienvenue</string>
+    <string name="login_username_hint">Entrez votre nom d\'utilisateur</string>
+    <string name="login_continue">Continuer</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_collection">Collection</string>
+    <string name="nav_coming_soon">À venir</string>
+    <string name="nav_ajout">Ajout</string>
+    <string name="nav_compte">Compte</string>
+    <string name="nav_marche">Marché</string>
+    
+    <!-- Home -->
+    <string name="home_boosters_title">Boosters</string>
+    <string name="home_booster_charge">Ouverture restante %d/%d</string>
+    <string name="home_no_booster_message">Aucun booster téléchargé pour le moment</string>
+    <string name="home_no_openings_available">Pas d\'ouvertures disponibles. Attendez la recharge.</string>
+    
+    <!-- Booster Selection -->
+    <string name="booster_selection_remaining">Restant: %d</string>
+    <string name="booster_selection_completion">%d%% Complet</string>
+    
+    <!-- Booster Opening -->
+    <string name="booster_opening_tap_hint">Tapez 5 fois ou glissez vers le haut</string>
+    
+    <!-- Reveal Cards -->
+    <string name="reveal_tap_hint">Tapez pour révéler</string>
+    
+    <!-- Collection -->
+    <string name="collection_header">%s\n%d/%d</string>
+    <string name="collection_total">Total %d | %d</string>
+    <string name="collection_total_only">Total: %d</string>
+    <string name="collection_tooltip">%d total, %d chargé dans l\'application</string>
+    <string name="card_rarity_short">R</string>
+    <string name="card_upgrade_short">A</string>
+    <string name="card_rarity">Rareté</string>
+    <string name="card_upgrade">Amélioration</string>
+    
+    <!-- Card Reveal -->
+    <string name="card_viewer_reset">Double tapez pour réinitialiser</string>
+    <string name="card_reveal_title">Cartes Révélées</string>
+    <string name="card_reveal_continue">Continuer</string>
+    
+    <!-- Market -->
+    <string name="market_error_data_unavailable">Erreur: données non disponibles</string>
+    <string name="market_insufficient_tokens">Tokens insuffisants! Vous avez %d tokens.</string>
+    <string name="market_confirm_purchase">Confirmer l\'achat</string>
+    <string name="market_purchase_message">Voulez-vous acheter %d booster(s) pour %d tokens?\n\nSolde actuel: %d tokens\nBoosters actuels: %d/%d</string>
+    <string name="market_confirm">Confirmer</string>
+    <string name="market_cancel">Annuler</string>
+    <string name="market_purchase_success">Achat réussi! + %d booster(s)</string>
+    
+    <!-- Placeholder -->
+    <string name="coming_soon">À venir</string>
+    
+    <!-- Ajout -->
+    <string name="add_repository">Ajouter</string>
+    <string name="repository_url">URL du dépôt</string>
+    <string name="repository_password">Mot de passe</string>
+    <string name="repository_warning">Attention les sources ne sont pas vérifier</string>
+    <string name="validate">Valider</string>
+    <string name="delete_repository">Supprimer</string>
+    <string name="delete_repository_confirmation">Voulez-vous vraiment supprimer %s ?</string>
+    <string name="confirm">Confirmer</string>
+    <string name="cancel">Annuler</string>
+    <string name="invalid_repository_url">URL invalide. Doit contenir https et github</string>
+    <string name="no_internet_connection">Pas de connexion internet</string>
+    <string name="zip_extracted_successfully">Zip extrait avec succès</string>
+    <string name="search_repositories">Rechercher...</string>
+    <string name="search_boosters">Rechercher des boosters...</string>
+    <string name="delete_mode_title">Mode de suppression</string>
+    <string name="delete_mode_hard">Hard - Supprimer le booster et toutes les images découvertes</string>
+    <string name="delete_mode_soft">Soft - Supprimer le booster mais garder les images découvertes</string>
+    <string name="cannot_delete_link">Impossible de supprimer le lien. Supprimez d\'abord tous les boosters en mode hard.</string>
+    
+    <!-- Common -->
+    <string name="error_generic">Une erreur s\'est produite</string>
+    <string name="loading">Chargement…</string>
+    <string name="page_title_compte">Compte</string>
+    <string name="page_title_marche">Marché</string>
+    
+    <!-- Account -->
+    <string name="account_username">Nom d\'utilisateur</string>
+    <string name="account_credits">Crédits</string>
+    <string name="account_language">Langue</string>
+    <string name="account_language_english">Anglais</string>
+    <string name="account_language_french">Français</string>
+    <string name="account_settings">Paramètres</string>
+</resources>

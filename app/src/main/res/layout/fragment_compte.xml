@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_theme_background"
+    android:padding="24dp"
+    tools:context=".ui.compte.CompteFragment">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/page_title_compte"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/md_theme_onBackground"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Username Section -->
+    <TextView
+        android:id="@+id/username_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/account_username"
+        android:textSize="16sp"
+        android:textColor="@color/md_theme_onBackground"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/title_text"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/username_display"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/md_theme_primary"
+        android:layout_marginTop="8dp"
+        android:padding="12dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toBottomOf="@id/username_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Player123" />
+
+    <!-- Credits Section -->
+    <TextView
+        android:id="@+id/credits_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/account_credits"
+        android:textSize="16sp"
+        android:textColor="@color/md_theme_onBackground"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/username_display"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/credits_display"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/md_theme_primary"
+        android:layout_marginTop="8dp"
+        android:padding="12dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toBottomOf="@id/credits_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="1500" />
+
+    <!-- Settings Section -->
+    <TextView
+        android:id="@+id/settings_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/account_settings"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/md_theme_onBackground"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/credits_display"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Language Selection -->
+    <TextView
+        android:id="@+id/language_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/account_language"
+        android:textSize="16sp"
+        android:textColor="@color/md_theme_onBackground"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/settings_title"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/language_radio_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/language_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <RadioButton
+            android:id="@+id/radio_english"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/account_language_english"
+            android:textSize="16sp"
+            android:textColor="@color/md_theme_onBackground"
+            android:buttonTint="@color/md_theme_primary" />
+
+        <RadioButton
+            android:id="@+id/radio_french"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/account_language_french"
+            android:textSize="16sp"
+            android:textColor="@color/md_theme_onBackground"
+            android:buttonTint="@color/md_theme_primary"
+            android:layout_marginTop="8dp" />
+
+    </RadioGroup>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
