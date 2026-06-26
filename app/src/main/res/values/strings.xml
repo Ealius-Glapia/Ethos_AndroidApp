@@ -80,12 +80,16 @@
     <string name="delete_mode_hard">Hard - Delete booster and all discovered images</string>
     <string name="delete_mode_soft">Soft - Delete booster but keep discovered images</string>
     <string name="cannot_delete_link">Cannot delete link. First delete all boosters in hard mode.</string>
+    <string name="edit_password">Edit password</string>
+    <string name="update_password">Update</string>
+    <string name="new_password">New password</string>
     
     <!-- Common -->
     <string name="error_generic">An error occurred</string>
     <string name="loading">Loading…</string>
     <string name="page_title_compte">Account</string>
     <string name="page_title_marche">Market</string>
+    <string name="page_title_collection">Collection</string>
     
     <!-- Account -->
     <string name="account_username">Username</string>
@@ -100,4 +104,9 @@
     <string name="notification_booster_recharged_text">Your boosters have been recharged. Current: %d/%d</string>
     <string name="notification_daily_reminder_title">Hey, I exist!</string>
     <string name="notification_daily_reminder_text">Come check the app, new boosters might be waiting for you!</string>
+
+    <!-- Card Swipe -->
+    <string name="card_swipe_no_previous">No previous card</string>
+    <string name="card_swipe_no_next">No next card</string>
+    <string name="card_swipe_navigation_error">Navigation error</string>
 </resources>

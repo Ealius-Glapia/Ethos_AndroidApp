@@ -50,6 +50,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/person_name" />
 
+        <TextView
+            android:id="@+id/card_upgrade"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:textColor="@color/md_theme_onSurfaceVariant"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card_rarity" />
+
         <LinearLayout
             android:id="@+id/token_gain_container"
             android:layout_width="wrap_content"
@@ -60,7 +72,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/card_rarity">
+            app:layout_constraintTop_toBottomOf="@+id/card_upgrade">
 
             <TextView
                 android:id="@+id/token_gain_text"

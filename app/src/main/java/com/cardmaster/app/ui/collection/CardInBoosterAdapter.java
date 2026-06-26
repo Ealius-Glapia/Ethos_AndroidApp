@@ -28,6 +28,10 @@ public class CardInBoosterAdapter extends RecyclerView.Adapter<CardInBoosterAdap
         this.fragment = fragment;
     }
 
+    public List<Card> getCards() {
+        return cards;
+    }
+
     @NonNull
     @Override
     public CardViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -39,7 +43,7 @@ public class CardInBoosterAdapter extends RecyclerView.Adapter<CardInBoosterAdap
     @Override
     public void onBindViewHolder(@NonNull CardViewHolder holder, int position) {
         Card card = cards.get(position);
-        holder.bind(card, ownedCardsMap);
+        holder.bind(card, ownedCardsMap, cards);
     }
 
     @Override
@@ -51,6 +55,7 @@ public class CardInBoosterAdapter extends RecyclerView.Adapter<CardInBoosterAdap
         private ImageView cardImage;
         private TextView cardInfo;
         private Fragment fragment;
+        private List<Card> cards;
 
         public CardViewHolder(@NonNull View itemView, Fragment fragment) {
             super(itemView);
@@ -59,7 +64,8 @@ public class CardInBoosterAdapter extends RecyclerView.Adapter<CardInBoosterAdap
             cardInfo = itemView.findViewById(R.id.card_info);
         }
 
-        public void bind(Card card, Map<Integer, Card> ownedCardsMap) {
+        public void bind(Card card, Map<Integer, Card> ownedCardsMap, List<Card> cards) {
+            this.cards = cards;
             Card ownedCard = ownedCardsMap.get(card.getId());
             boolean isOwned = ownedCard != null;
 
@@ -84,7 +90,7 @@ public class CardInBoosterAdapter extends RecyclerView.Adapter<CardInBoosterAdap
                 // Only allow opening dialog for owned cards
                 if (isOwned) {
                     com.cardmaster.app.ui.cardreveal.CardImageDialog dialog =
-                        com.cardmaster.app.ui.cardreveal.CardImageDialog.newInstance(ownedCard);
+                        com.cardmaster.app.ui.cardreveal.CardImageDialog.newInstance(ownedCard, cards, true);
                     dialog.show(fragment.getParentFragmentManager(), "card_image_dialog");
                 }
             });

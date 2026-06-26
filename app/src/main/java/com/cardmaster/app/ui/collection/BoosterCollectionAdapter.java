@@ -90,12 +90,12 @@ public class BoosterCollectionAdapter extends RecyclerView.Adapter<BoosterCollec
 
             List<Card> cards = boosterWithCards.cards;
 
-            // Sort cards by rarity (probability) - lower rarity = higher probability
+            // Sort cards by rarity + upgrade sum (ascending)
             cards.sort((c1, c2) -> {
                 try {
-                    int r1 = Integer.parseInt(c1.getRarity());
-                    int r2 = Integer.parseInt(c2.getRarity());
-                    return Integer.compare(r1, r2);
+                    int sum1 = Integer.parseInt(c1.getRarity()) + c1.getNumber();
+                    int sum2 = Integer.parseInt(c2.getRarity()) + c2.getNumber();
+                    return Integer.compare(sum1, sum2);
                 } catch (NumberFormatException e) {
                     return c1.getRarity().compareTo(c2.getRarity());
                 }

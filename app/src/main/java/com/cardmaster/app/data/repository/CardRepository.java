@@ -46,6 +46,10 @@ public class CardRepository {
         executor.execute(() -> cardDao.insertAll(cards));
     }
 
+    public void updateCardBoosterId(int cardId, int newBoosterId) {
+        executor.execute(() -> cardDao.updateCardBoosterId(cardId, newBoosterId));
+    }
+
     public void shutdown() {
         executor.shutdown();
     }

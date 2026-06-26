@@ -28,6 +28,10 @@ public class CardRevealAdapter extends RecyclerView.Adapter<CardRevealAdapter.Ca
         this.fragment = fragment;
     }
 
+    public List<Card> getCards() {
+        return cards;
+    }
+
     @NonNull
     @Override
     public CardViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -39,7 +43,7 @@ public class CardRevealAdapter extends RecyclerView.Adapter<CardRevealAdapter.Ca
     @Override
     public void onBindViewHolder(@NonNull CardViewHolder holder, int position) {
         Card card = cards.get(position);
-        holder.bind(card, tokenGains);
+        holder.bind(card, tokenGains, cards);
     }
 
     @Override
@@ -51,10 +55,12 @@ public class CardRevealAdapter extends RecyclerView.Adapter<CardRevealAdapter.Ca
         private ImageView cardImage;
         private TextView personName;
         private TextView cardRarity;
+        private TextView cardUpgrade;
         private LinearLayout tokenGainContainer;
         private TextView tokenGainText;
         private com.google.android.material.card.MaterialCardView cardWrapper;
         private Fragment fragment;
+        private List<Card> cards;
 
         public CardViewHolder(@NonNull View itemView, Fragment fragment) {
             super(itemView);
@@ -62,16 +68,19 @@ public class CardRevealAdapter extends RecyclerView.Adapter<CardRevealAdapter.Ca
             cardImage = itemView.findViewById(R.id.card_image);
             personName = itemView.findViewById(R.id.person_name);
             cardRarity = itemView.findViewById(R.id.card_rarity);
+            cardUpgrade = itemView.findViewById(R.id.card_upgrade);
             tokenGainContainer = itemView.findViewById(R.id.token_gain_container);
             tokenGainText = itemView.findViewById(R.id.token_gain_text);
             cardWrapper = itemView.findViewById(R.id.card_wrapper);
         }
 
-        public void bind(Card card, Map<Integer, Integer> tokenGains) {
+        public void bind(Card card, Map<Integer, Integer> tokenGains, List<Card> cards) {
+            this.cards = cards;
             personName.setText(card.getDescription());
             String rarityLabel = itemView.getContext().getString(R.string.card_rarity);
             String upgradeLabel = itemView.getContext().getString(R.string.card_upgrade);
-            cardRarity.setText(rarityLabel + ": " + card.getRarity() + " " + upgradeLabel + ": " + card.getNumber());
+            cardRarity.setText(rarityLabel + ": " + card.getRarity());
+            cardUpgrade.setText(upgradeLabel + ": " + card.getNumber());
 
             // Load card image from file path (supports webp)
             java.io.File imageFile = new java.io.File(card.getImageUrl());
@@ -99,7 +108,7 @@ public class CardRevealAdapter extends RecyclerView.Adapter<CardRevealAdapter.Ca
 
             // Click to open full screen image
             itemView.setOnClickListener(v -> {
-                CardImageDialog dialog = CardImageDialog.newInstance(card);
+                CardImageDialog dialog = CardImageDialog.newInstance(card, cards, false);
                 dialog.show(fragment.getParentFragmentManager(), "card_image_dialog");
             });
         }

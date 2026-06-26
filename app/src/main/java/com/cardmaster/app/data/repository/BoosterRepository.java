@@ -29,6 +29,10 @@ public class BoosterRepository {
         return boosterDao.getBoosterByIdSync(boosterId);
     }
 
+    public List<Booster> getAllBoostersSync() {
+        return boosterDao.getAllBoostersSync();
+    }
+
     public void insertBooster(Booster booster) {
         executor.execute(() -> boosterDao.insert(booster));
     }

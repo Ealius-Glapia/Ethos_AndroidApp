@@ -38,4 +38,7 @@ public interface CardDao {
 
     @Query("DELETE FROM cards")
     void deleteAll();
+
+    @Query("UPDATE cards SET boosterId = :newBoosterId WHERE id = :cardId")
+    void updateCardBoosterId(int cardId, int newBoosterId);
 }

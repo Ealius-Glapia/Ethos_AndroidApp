@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/home_boosters_title"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/md_theme_onBackground"
         app:layout_constraintStart_toStartOf="parent"

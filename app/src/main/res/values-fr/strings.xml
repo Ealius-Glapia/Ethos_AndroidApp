@@ -80,6 +80,9 @@
     <string name="delete_mode_hard">Hard - Supprimer le booster et toutes les images découvertes</string>
     <string name="delete_mode_soft">Soft - Supprimer le booster mais garder les images découvertes</string>
     <string name="cannot_delete_link">Impossible de supprimer le lien. Supprimez d\'abord tous les boosters en mode hard.</string>
+    <string name="edit_password">Modifier le mot de passe</string>
+    <string name="update_password">Mettre à jour</string>
+    <string name="new_password">Nouveau mot de passe</string>
     
     <!-- Common -->
     <string name="error_generic">Une erreur s\'est produite</string>
@@ -94,4 +97,9 @@
     <string name="account_language_english">Anglais</string>
     <string name="account_language_french">Français</string>
     <string name="account_settings">Paramètres</string>
+
+    <!-- Card Swipe -->
+    <string name="card_swipe_no_previous">Pas de carte précédente</string>
+    <string name="card_swipe_no_next">Pas de carte suivante</string>
+    <string name="card_swipe_navigation_error">Erreur de navigation</string>
 </resources>

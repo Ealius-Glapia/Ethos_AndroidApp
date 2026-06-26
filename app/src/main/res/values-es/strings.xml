@@ -44,4 +44,9 @@
     <!-- Common -->
     <string name="error_generic">Ocurrió un error</string>
     <string name="loading">Cargando…</string>
+
+    <!-- Card Swipe -->
+    <string name="card_swipe_no_previous">No hay carta anterior</string>
+    <string name="card_swipe_no_next">No hay carta siguiente</string>
+    <string name="card_swipe_navigation_error">Error de navegación</string>
 </resources>

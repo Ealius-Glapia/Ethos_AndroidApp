@@ -53,4 +53,7 @@ public interface OwnedCardDao {
     @Transaction
     @Query("UPDATE owned_cards SET quantity = quantity + 1 WHERE cardId = :cardId")
     void incrementQuantity(int cardId);
+
+    @Query("SELECT COUNT(*) FROM owned_cards WHERE cardId = :cardId")
+    boolean isCardOwnedSync(int cardId);
 }

@@ -87,4 +87,8 @@ public class OwnedCardRepository {
     public OwnedCardDao getOwnedCardDao() {
         return ownedCardDao;
     }
+
+    public boolean isCardOwnedSync(int cardId) {
+        return ownedCardDao.isCardOwnedSync(cardId);
+    }
 }

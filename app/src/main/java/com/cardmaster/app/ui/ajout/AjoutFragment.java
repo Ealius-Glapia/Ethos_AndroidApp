@@ -81,7 +81,7 @@ public class AjoutFragment extends Fragment {
     }
 
     private void setupRecyclerView() {
-        adapter = new RepositoryAdapter(filteredRepositories, this::onRepositoryClicked, this::onDeleteClicked);
+        adapter = new RepositoryAdapter(filteredRepositories, this::onRepositoryClicked, this::onDeleteClicked, this::onEditPasswordClicked);
         repositoryRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         repositoryRecyclerView.setAdapter(adapter);
     }
@@ -194,5 +194,14 @@ public class AjoutFragment extends Fragment {
             }
         }
         return false;
+    }
+
+    private void onEditPasswordClicked(GitHubRepository repository, int position) {
+        EditPasswordDialog dialog = EditPasswordDialog.newInstance(repository);
+        dialog.setListener((newPassword) -> {
+            repository.setPassword(newPassword);
+            saveRepositories();
+        });
+        dialog.show(getChildFragmentManager(), "EditPasswordDialog");
     }
 }

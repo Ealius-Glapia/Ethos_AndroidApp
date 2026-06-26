@@ -89,6 +89,13 @@ public class BoosterOpeningViewModel extends ViewModel {
             }
         }
         
+        // Sort cards by rarity + upgrade sum (ascending)
+        cards.sort((card1, card2) -> {
+            int sum1 = Integer.parseInt(card1.getRarity()) + card1.getNumber();
+            int sum2 = Integer.parseInt(card2.getRarity()) + card2.getNumber();
+            return Integer.compare(sum1, sum2);
+        });
+        
         return cards;
     }
 

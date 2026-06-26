@@ -1,5 +1,7 @@
 package com.cardmaster.app.ui.ajout;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ public class RepositoryAdapter extends RecyclerView.Adapter<RepositoryAdapter.Vi
     private List<GitHubRepository> repositories;
     private final OnRepositoryClickListener onRepositoryClickListener;
     private final OnDeleteClickListener onDeleteClickListener;
+    private final OnEditPasswordClickListener onEditPasswordClickListener;
 
     public interface OnRepositoryClickListener {
         void onRepositoryClick(GitHubRepository repository);
@@ -28,12 +31,18 @@ public class RepositoryAdapter extends RecyclerView.Adapter<RepositoryAdapter.Vi
         void onDeleteClick(GitHubRepository repository, int position);
     }
 
+    public interface OnEditPasswordClickListener {
+        void onEditPasswordClick(GitHubRepository repository, int position);
+    }
+
     public RepositoryAdapter(List<GitHubRepository> repositories, 
                              OnRepositoryClickListener onRepositoryClickListener,
-                             OnDeleteClickListener onDeleteClickListener) {
+                             OnDeleteClickListener onDeleteClickListener,
+                             OnEditPasswordClickListener onEditPasswordClickListener) {
         this.repositories = repositories;
         this.onRepositoryClickListener = onRepositoryClickListener;
         this.onDeleteClickListener = onDeleteClickListener;
+        this.onEditPasswordClickListener = onEditPasswordClickListener;
     }
 
     @NonNull
@@ -61,8 +70,25 @@ public class RepositoryAdapter extends RecyclerView.Adapter<RepositoryAdapter.Vi
             holder.repoTextView.setText("");
         }
         
-        holder.itemView.setOnClickListener(v -> onRepositoryClickListener.onRepositoryClick(repository));
         holder.deleteButton.setOnClickListener(v -> onDeleteClickListener.onDeleteClick(repository, position));
+        holder.editPasswordButton.setOnClickListener(v -> {
+            holder.cancelHideButton();
+            onEditPasswordClickListener.onEditPasswordClick(repository, position);
+        });
+        
+        // Long press on repoTextView to show edit password button
+        holder.repoTextView.setOnLongClickListener(v -> {
+            holder.editPasswordButton.setVisibility(View.VISIBLE);
+            holder.scheduleHideButton();
+            return true;
+        });
+        
+        // Click on itemView to navigate to repository
+        holder.itemView.setOnClickListener(v -> {
+            holder.editPasswordButton.setVisibility(View.GONE);
+            holder.cancelHideButton();
+            onRepositoryClickListener.onRepositoryClick(repository);
+        });
     }
 
     private String[] parseGitHubUrl(String url) {
@@ -101,13 +127,28 @@ public class RepositoryAdapter extends RecyclerView.Adapter<RepositoryAdapter.Vi
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView userTextView;
         TextView repoTextView;
+        TextView editPasswordButton;
         ImageView deleteButton;
+        private Handler hideHandler;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             userTextView = itemView.findViewById(R.id.repository_user_text);
             repoTextView = itemView.findViewById(R.id.repository_repo_text);
+            editPasswordButton = itemView.findViewById(R.id.edit_password_button);
             deleteButton = itemView.findViewById(R.id.delete_repository_button);
+            hideHandler = new Handler(Looper.getMainLooper());
         }
+
+        private void scheduleHideButton() {
+            hideHandler.removeCallbacks(hideButtonRunnable);
+            hideHandler.postDelayed(hideButtonRunnable, 3000); // Hide after 3 seconds
+        }
+
+        private void cancelHideButton() {
+            hideHandler.removeCallbacks(hideButtonRunnable);
+        }
+
+        private final Runnable hideButtonRunnable = () -> editPasswordButton.setVisibility(View.GONE);
     }
 }
