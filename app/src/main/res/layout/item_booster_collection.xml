@@ -32,6 +32,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/booster_card_count"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/md_theme_onSurfaceVariant"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/booster_name" />
+
     <LinearLayout
         android:id="@+id/rarity_icons_container"
         android:layout_width="0dp"
@@ -42,7 +55,7 @@
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/booster_name" />
+        app:layout_constraintTop_toBottomOf="@+id/booster_card_count" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/cards_recycler_view"

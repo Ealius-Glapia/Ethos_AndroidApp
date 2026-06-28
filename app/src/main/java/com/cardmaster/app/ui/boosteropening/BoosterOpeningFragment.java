@@ -55,7 +55,7 @@ public class BoosterOpeningFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         
         app = CardMasterApplication.getInstance();
-        viewModel = new ViewModelProvider(this, new BoosterOpeningViewModelFactory(app.getCardRepository()))
+        viewModel = new ViewModelProvider(this, new BoosterOpeningViewModelFactory(app.getCardRepository(), app.getOwnedCardRepository()))
                 .get(BoosterOpeningViewModel.class);
         
         packImage = view.findViewById(R.id.pack_image);
@@ -184,15 +184,29 @@ public class BoosterOpeningFragment extends Fragment {
     }
 
     private void startOpeningSequence() {
-        // Vibrate when opening booster
-        Vibrator vibrator = (Vibrator) requireContext().getSystemService(android.content.Context.VIBRATOR_SERVICE);
-        if (vibrator != null && vibrator.hasVibrator()) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
-            } else {
-                vibrator.vibrate(200);
+        // Vibrate when opening booster (if enabled in settings)
+        app.getPreferencesManager().getVibrationEnabled(new com.cardmaster.app.data.preferences.UserPreferencesManager.VibrationCallback() {
+            @Override
+            public void onVibrationLoaded(boolean enabled) {
+                if (enabled) {
+                    Vibrator vibrator = (Vibrator) requireContext().getSystemService(android.content.Context.VIBRATOR_SERVICE);
+                    if (vibrator != null && vibrator.hasVibrator()) {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+                        } else {
+                            vibrator.vibrate(200);
+                        }
+                    }
+                }
+                // Continue animation on UI thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> continueOpeningAnimation());
+                }
             }
-        }
+        });
+    }
+
+    private void continueOpeningAnimation() {
 
         AnimatorSet openingSet = new AnimatorSet();
         

@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 
 import com.cardmaster.app.data.entity.Card;
 import com.cardmaster.app.data.repository.CardRepository;
+import com.cardmaster.app.data.repository.OwnedCardRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.concurrent.Executors;
 
 public class BoosterOpeningViewModel extends ViewModel {
     private final CardRepository cardRepository;
+    private final OwnedCardRepository ownedCardRepository;
     private final CardSelectionHelper cardSelectionHelper;
     private int boosterId;
     private final MutableLiveData<List<Card>> revealedCards = new MutableLiveData<>();
@@ -22,8 +24,9 @@ public class BoosterOpeningViewModel extends ViewModel {
     int tapCount = 0;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public BoosterOpeningViewModel(CardRepository cardRepository) {
+    public BoosterOpeningViewModel(CardRepository cardRepository, OwnedCardRepository ownedCardRepository) {
         this.cardRepository = cardRepository;
+        this.ownedCardRepository = ownedCardRepository;
         this.cardSelectionHelper = new CardSelectionHelper();
    }
 
@@ -111,9 +114,38 @@ public class BoosterOpeningViewModel extends ViewModel {
             return null;
         }
         
-        // Return random card from matching cards
+        // Calculate weighted selection based on how many times each card has been obtained
+        // Weight decreases linearly with quantity, but never reaches 0
+        // At 20 times, weight is about 40% of original (reduction factor of 0.03)
+        // Minimum weight is 20% to ensure non-zero probability
+        final double REDUCTION_FACTOR = 0.03;
+        final double MIN_WEIGHT = 0.2;
+        
+        List<Double> weights = new ArrayList<>();
+        double totalWeight = 0.0;
+        
+        for (Card card : matchingCards) {
+            int quantity = ownedCardRepository.getOwnedCardDao().getQuantityByCardIdSync(card.getId());
+            double weight = 1.0 - (quantity * REDUCTION_FACTOR);
+            weight = Math.max(weight, MIN_WEIGHT);
+            weights.add(weight);
+            totalWeight += weight;
+        }
+        
+        // Select card based on weights
         Random random = new Random();
-        return matchingCards.get(random.nextInt(matchingCards.size()));
+        double randomValue = random.nextDouble() * totalWeight;
+        
+        double cumulativeWeight = 0.0;
+        for (int i = 0; i < matchingCards.size(); i++) {
+            cumulativeWeight += weights.get(i);
+            if (randomValue <= cumulativeWeight) {
+                return matchingCards.get(i);
+            }
+        }
+        
+        // Fallback to last card if something goes wrong
+        return matchingCards.get(matchingCards.size() - 1);
     }
 
     private Card findClosestCard(List<Card> cards, int targetUpgrade, int targetRarity) {

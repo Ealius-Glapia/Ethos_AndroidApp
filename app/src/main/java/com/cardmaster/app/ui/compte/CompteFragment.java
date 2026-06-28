@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ public class CompteFragment extends Fragment {
     private TextView usernameTextView;
     private TextView creditsTextView;
     private RadioGroup languageRadioGroup;
+    private CheckBox vibrationCheckbox;
     private UserPreferencesManager preferencesManager;
     private String currentLanguage;
 
@@ -47,12 +49,16 @@ public class CompteFragment extends Fragment {
         usernameTextView = view.findViewById(R.id.username_display);
         creditsTextView = view.findViewById(R.id.credits_display);
         languageRadioGroup = view.findViewById(R.id.language_radio_group);
+        vibrationCheckbox = view.findViewById(R.id.vibration_checkbox);
         
         loadUsername();
         observeCredits();
 
         // Load language preference first
         loadLanguagePreference();
+
+        // Load vibration preference
+        loadVibrationPreference();
 
         // Set up individual radio button click listeners instead of RadioGroup listener
         // This prevents the listener from triggering on programmatic changes
@@ -77,6 +83,11 @@ public class CompteFragment extends Fragment {
                     ((MainActivity) getActivity()).changeLanguage(newLanguage);
                 }
             }
+        });
+
+        // Set up vibration checkbox listener
+        vibrationCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            preferencesManager.saveVibrationEnabled(isChecked);
         });
     }
     
@@ -117,6 +128,21 @@ public class CompteFragment extends Fragment {
                         if (languageRadioGroup != null) {
                             int checkedId = ("fr".equals(language)) ? R.id.radio_french : R.id.radio_english;
                             languageRadioGroup.check(checkedId);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void loadVibrationPreference() {
+        preferencesManager.getVibrationEnabled(new UserPreferencesManager.VibrationCallback() {
+            @Override
+            public void onVibrationLoaded(boolean enabled) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (vibrationCheckbox != null) {
+                            vibrationCheckbox.setChecked(enabled);
                         }
                     });
                 }

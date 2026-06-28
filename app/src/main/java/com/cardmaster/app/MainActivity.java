@@ -1,13 +1,22 @@
 package com.cardmaster.app;
 
+import android.Manifest;
+import android.app.AlarmManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
@@ -26,7 +35,7 @@ import com.cardmaster.app.ui.login.LoginFragment;
 import com.cardmaster.app.ui.marche.MarcheFragment;
 import com.cardmaster.app.ui.splash.SplashFragment;
 import com.cardmaster.app.data.entity.Card;
-import com.cardmaster.app.work.WorkManagerHelper;
+import com.cardmaster.app.work.AlarmScheduler;
 
 import java.util.Locale;
 import java.util.List;
@@ -38,28 +47,35 @@ public class MainActivity extends AppCompatActivity implements
         BoosterOpeningFragment.BoosterOpenListener,
         CardRevealFragment.CardRevealListener {
 
+    private static final int PERMISSION_REQUEST_CODE = 1001;
+    private static final int ALARM_PERMISSION_REQUEST_CODE = 1002;
     private ActivityMainBinding binding;
     private NavController navController;
     private boolean isMainNavigationVisible = false;
     private TextView tokenCountText;
 
     @Override
-    protected void attachBaseContext(Context newBase) {
-        // Load language synchronously from SharedPreferences
-        android.content.SharedPreferences prefs = newBase.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        String language = prefs.getString("language", "en");
-
-        Locale locale = new Locale(language);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration(newBase.getResources().getConfiguration());
-        config.setLocale(locale);
-        Context context = newBase.createConfigurationContext(config);
-        super.attachBaseContext(context);
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Request notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        PERMISSION_REQUEST_CODE);
+            }
+        }
+
+        // Request SCHEDULE_EXACT_ALARM permission for Android 12+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
+                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                startActivity(intent);
+            }
+        }
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -83,6 +99,32 @@ public class MainActivity extends AppCompatActivity implements
                 binding.bottomNavigation.setSelectedItemId(R.id.navigation_home);
             }
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+            } else {
+                // Permission denied
+            }
+        }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        // Load language synchronously from SharedPreferences
+        android.content.SharedPreferences prefs = newBase.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String language = prefs.getString("language", "en");
+
+        Locale locale = new Locale(language);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration(newBase.getResources().getConfiguration());
+        config.setLocale(locale);
+        Context context = newBase.createConfigurationContext(config);
+        super.attachBaseContext(context);
     }
 
     private void setupNavigation() {
@@ -251,24 +293,38 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        // Schedule background work to check booster charge when app goes to background
+        // Schedule alarm to check booster charge when app goes to background
         scheduleBoosterChargeCheck();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Cancel background work when app comes to foreground (timer will handle it)
-        WorkManagerHelper.cancelBoosterChargeCheck(this);
+        // Cancel alarm when app comes to foreground (timer will handle it)
+        AlarmScheduler.cancelBoosterChargeCheck(this);
+        // Reschedule daily reminder alarm in case permission was granted
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
+                    AlarmScheduler.scheduleDailyReminder(this);
+                }
+            } else {
+                // Android 11 and below don't need this permission
+                AlarmScheduler.scheduleDailyReminder(this);
+            }
+        } catch (SecurityException e) {
+            android.util.Log.e("MainActivity", "SecurityException when scheduling alarm: " + e.getMessage());
+        }
     }
 
     private void scheduleBoosterChargeCheck() {
         CardMasterApplication app = CardMasterApplication.getInstance();
         com.cardmaster.app.data.entity.BoosterCharge boosterCharge = app.getBoosterChargeRepository().getBoosterChargeSync();
-        
+
         if (boosterCharge != null && boosterCharge.getCurrentCharge() < boosterCharge.getMaxCharge()) {
-            // Schedule periodic work to check booster charge every 15 minutes
-            WorkManagerHelper.scheduleBoosterChargeCheck(this);
+            // Schedule alarm to check booster charge in 15 minutes
+            AlarmScheduler.scheduleBoosterChargeCheck(this);
         }
     }
 

@@ -52,6 +52,7 @@ public class BoosterCollectionAdapter extends RecyclerView.Adapter<BoosterCollec
 
     static class BoosterViewHolder extends RecyclerView.ViewHolder {
         private TextView boosterName;
+        private TextView boosterCardCount;
         private RecyclerView cardsRecyclerView;
         private LinearLayout rarityIconsContainer;
         private ImageView expandIcon;
@@ -62,6 +63,7 @@ public class BoosterCollectionAdapter extends RecyclerView.Adapter<BoosterCollec
             super(itemView);
             this.fragment = fragment;
             boosterName = itemView.findViewById(R.id.booster_name);
+            boosterCardCount = itemView.findViewById(R.id.booster_card_count);
             cardsRecyclerView = itemView.findViewById(R.id.cards_recycler_view);
             rarityIconsContainer = itemView.findViewById(R.id.rarity_icons_container);
             expandIcon = itemView.findViewById(R.id.expand_icon);
@@ -74,10 +76,12 @@ public class BoosterCollectionAdapter extends RecyclerView.Adapter<BoosterCollec
         private void toggleExpand() {
             isExpanded = !isExpanded;
             if (isExpanded) {
+                boosterCardCount.setVisibility(View.VISIBLE);
                 rarityIconsContainer.setVisibility(View.VISIBLE);
                 cardsRecyclerView.setVisibility(View.VISIBLE);
                 expandIcon.setRotation(180);
             } else {
+                boosterCardCount.setVisibility(View.GONE);
                 rarityIconsContainer.setVisibility(View.GONE);
                 cardsRecyclerView.setVisibility(View.GONE);
                 expandIcon.setRotation(0);
@@ -89,6 +93,16 @@ public class BoosterCollectionAdapter extends RecyclerView.Adapter<BoosterCollec
             boosterName.setText(displayName);
 
             List<Card> cards = boosterWithCards.cards;
+
+            // Calculate card count for this booster
+            int ownedCount = 0;
+            for (Card card : cards) {
+                if (ownedCardsMap.containsKey(card.getId())) {
+                    ownedCount++;
+                }
+            }
+            int totalCount = cards.size();
+            boosterCardCount.setText(itemView.getContext().getString(R.string.booster_card_count, ownedCount, totalCount));
 
             // Sort cards by rarity + upgrade sum (ascending)
             cards.sort((c1, c2) -> {
@@ -111,6 +125,7 @@ public class BoosterCollectionAdapter extends RecyclerView.Adapter<BoosterCollec
 
             // Reset to collapsed state
             isExpanded = false;
+            boosterCardCount.setVisibility(View.GONE);
             rarityIconsContainer.setVisibility(View.GONE);
             cardsRecyclerView.setVisibility(View.GONE);
             expandIcon.setRotation(0);

@@ -39,6 +39,7 @@
     <string name="collection_total">Total %d | %d</string>
     <string name="collection_total_only">Total: %d</string>
     <string name="collection_tooltip">%d total, %d chargé dans l\'application</string>
+    <string name="booster_card_count">%d/%d cartes obtenues</string>
     <string name="card_rarity_short">R</string>
     <string name="card_upgrade_short">A</string>
     <string name="card_rarity">Rareté</string>
@@ -83,7 +84,7 @@
     <string name="edit_password">Modifier le mot de passe</string>
     <string name="update_password">Mettre à jour</string>
     <string name="new_password">Nouveau mot de passe</string>
-    
+
     <!-- Common -->
     <string name="error_generic">Une erreur s\'est produite</string>
     <string name="loading">Chargement…</string>
@@ -97,6 +98,8 @@
     <string name="account_language_english">Anglais</string>
     <string name="account_language_french">Français</string>
     <string name="account_settings">Paramètres</string>
+    <string name="account_vibration">Vibration</string>
+    <string name="account_vibration_enabled">Activer la vibration</string>
 
     <!-- Card Swipe -->
     <string name="card_swipe_no_previous">Pas de carte précédente</string>

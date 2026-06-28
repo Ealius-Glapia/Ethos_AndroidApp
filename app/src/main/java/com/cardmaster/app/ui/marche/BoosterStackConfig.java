@@ -12,10 +12,10 @@ public class BoosterStackConfig {
     // Default configuration - easily modifiable
     public static BoosterStackConfig[] getDefaultStacks() {
         return new BoosterStackConfig[]{
-            new BoosterStackConfig(1, 1296),
-            new BoosterStackConfig(5, 4096),
-            new BoosterStackConfig(10, 6561),
-            new BoosterStackConfig(20, 10000)
+            new BoosterStackConfig(1, 6480),
+            new BoosterStackConfig(5, 20480),
+            new BoosterStackConfig(10, 32805),
+            new BoosterStackConfig(20, 50000)
         };
     }
 }

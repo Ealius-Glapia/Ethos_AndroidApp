@@ -1,6 +1,11 @@
 package com.cardmaster.app;
 
+import android.app.AlarmManager;
 import android.app.Application;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
 
 import com.cardmaster.app.data.database.AppDatabase;
 import com.cardmaster.app.data.database.DatabaseInitializer;
@@ -16,7 +21,7 @@ import com.cardmaster.app.data.repository.CardRepository;
 import com.cardmaster.app.data.repository.OwnedCardRepository;
 import com.cardmaster.app.data.repository.UserCurrencyRepository;
 import com.cardmaster.app.notification.NotificationHelper;
-import com.cardmaster.app.work.WorkManagerHelper;
+import com.cardmaster.app.work.AlarmScheduler;
 
 public class CardMasterApplication extends Application {
     private static CardMasterApplication instance;
@@ -55,10 +60,12 @@ public class CardMasterApplication extends Application {
         
         // Initialize notification channels
         NotificationHelper.createNotificationChannels(this);
-        
-        // Schedule daily reminder notification
-        WorkManagerHelper.scheduleDailyReminder(this);
-        
+
+        // Request SCHEDULE_EXACT_ALARM permission for Android 12+ and schedule alarms
+        // Note: We don't schedule alarms here anymore to avoid SecurityException
+        // The alarm scheduling will be handled in MainActivity after permission check
+        android.util.Log.d("CardMasterApp", "Alarm scheduling deferred to MainActivity");
+
         // Initialize booster charge synchronously
         new Thread(() -> {
             com.cardmaster.app.data.entity.BoosterCharge existing = boosterChargeDao.getBoosterChargeSync();

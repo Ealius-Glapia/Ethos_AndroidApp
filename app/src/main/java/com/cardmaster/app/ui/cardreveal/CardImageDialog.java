@@ -25,13 +25,13 @@ public class CardImageDialog extends DialogFragment {
     private static final String ARG_CARD = "card";
     private static final String ARG_CARDS_LIST = "cards_list";
     private static final String ARG_FROM_COLLECTION = "from_collection";
+    private static final float SWIPE_THRESHOLD = 200f;
 
     private Card card;
     private List<Card> cardsList;
     private boolean fromCollection;
     private PhotoView cardImageView;
     private float initialX;
-    private static final float SWIPE_THRESHOLD = 200f;
 
     public static CardImageDialog newInstance(Card card) {
         CardImageDialog dialog = new CardImageDialog();

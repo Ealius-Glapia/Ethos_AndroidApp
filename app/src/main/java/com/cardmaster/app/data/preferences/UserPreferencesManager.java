@@ -129,6 +129,34 @@ public class UserPreferencesManager {
         void onLanguageLoaded(String language);
     }
 
+    public void saveVibrationEnabled(boolean enabled) {
+        executor.execute(() -> {
+            try {
+                android.content.SharedPreferences prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+                prefs.edit().putBoolean("vibration_enabled", enabled).apply();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void getVibrationEnabled(VibrationCallback callback) {
+        executor.execute(() -> {
+            try {
+                android.content.SharedPreferences prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+                boolean enabled = prefs.getBoolean("vibration_enabled", true);
+                callback.onVibrationLoaded(enabled);
+            } catch (Exception e) {
+                e.printStackTrace();
+                callback.onVibrationLoaded(true);
+            }
+        });
+    }
+
+    public interface VibrationCallback {
+        void onVibrationLoaded(boolean enabled);
+    }
+
     public void shutdown() {
         executor.shutdown();
     }
