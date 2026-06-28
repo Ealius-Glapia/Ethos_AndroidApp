@@ -92,8 +92,7 @@ public class BoosterOpeningFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         Glide.with(requireContext())
                                 .load(finalImageFile)
-                                .placeholder(R.drawable.ic_launcher_foreground)
-                                .error(R.drawable.ic_launcher_foreground)
+                                .dontAnimate()
                                 .into(packImage);
                     });
                 }
@@ -232,8 +231,13 @@ public class BoosterOpeningFragment extends Fragment {
 
     private void navigateToReveal() {
         List<Card> cards = viewModel.getRevealedCards().getValue();
-        if (getActivity() instanceof BoosterOpenListener && cards != null) {
-            ((BoosterOpenListener) getActivity()).onBoosterOpened(cards);
+        if (cards != null && !cards.isEmpty()) {
+            // Navigate to card stack fragment
+            CardStackFragment cardStackFragment = CardStackFragment.newInstance(cards);
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.nav_host_fragment, cardStackFragment)
+                    .addToBackStack(null)
+                    .commit();
         }
     }
 

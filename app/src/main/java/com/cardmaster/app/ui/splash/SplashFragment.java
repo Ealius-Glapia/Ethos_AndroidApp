@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.cardmaster.app.CardMasterApplication;
 import com.cardmaster.app.R;
 
@@ -45,36 +46,47 @@ public class SplashFragment extends Fragment {
     }
 
     private void setupAnimations() {
-        // Setup opening image - start at full size to show complete image
-        openingImage.setScaleX(1.0f);
-        openingImage.setScaleY(1.0f);
-        openingImage.setAlpha(0f);
+        // Load image with Glide to prevent flash
+        Glide.with(this)
+                .load(R.drawable.opening_app_picture)
+                .dontAnimate()
+                .into(openingImage);
+        
+        // Make image visible after loading
+        openingImage.post(() -> {
+            openingImage.setVisibility(View.VISIBLE);
+            
+            // Setup opening image - start at full size to show complete image
+            openingImage.setScaleX(1.0f);
+            openingImage.setScaleY(1.0f);
+            openingImage.setAlpha(0f);
 
-        // Ethos text is already visible behind with alpha 0.7
-        logoText.setAlpha(0.7f);
+            // Ethos text is already visible behind with alpha 0.7
+            logoText.setAlpha(0.7f);
 
-        AnimatorSet animatorSet = new AnimatorSet();
+            AnimatorSet animatorSet = new AnimatorSet();
 
-        // Image zoom animation - zooming then passing through screen
-        ObjectAnimator imageScaleX = ObjectAnimator.ofFloat(openingImage, "scaleX", 1.0f, 15.0f);
-        imageScaleX.setDuration(3400);
-        imageScaleX.setInterpolator(new DecelerateInterpolator());
+            // Image zoom animation - zooming then passing through screen
+            ObjectAnimator imageScaleX = ObjectAnimator.ofFloat(openingImage, "scaleX", 1.0f, 15.0f);
+            imageScaleX.setDuration(3400);
+            imageScaleX.setInterpolator(new DecelerateInterpolator());
 
-        ObjectAnimator imageScaleY = ObjectAnimator.ofFloat(openingImage, "scaleY", 1.0f, 15.0f);
-        imageScaleY.setDuration(4000);
-        imageScaleY.setInterpolator(new DecelerateInterpolator());
+            ObjectAnimator imageScaleY = ObjectAnimator.ofFloat(openingImage, "scaleY", 1.0f, 15.0f);
+            imageScaleY.setDuration(4000);
+            imageScaleY.setInterpolator(new DecelerateInterpolator());
 
-        // Fade in quickly at start
-        ObjectAnimator imageFadeIn = ObjectAnimator.ofFloat(openingImage, "alpha", 0f, 1f);
-        imageFadeIn.setDuration(400);
+            // Fade in quickly at start
+            ObjectAnimator imageFadeIn = ObjectAnimator.ofFloat(openingImage, "alpha", 0f, 1f);
+            imageFadeIn.setDuration(400);
 
-        // Continuous fade out until completely transparent
-        ObjectAnimator imageFadeOut = ObjectAnimator.ofFloat(openingImage, "alpha", 1f, 0f);
-        imageFadeOut.setDuration(3000);
-        imageFadeOut.setStartDelay(400);
+            // Continuous fade out until completely transparent
+            ObjectAnimator imageFadeOut = ObjectAnimator.ofFloat(openingImage, "alpha", 1f, 0f);
+            imageFadeOut.setDuration(3000);
+            imageFadeOut.setStartDelay(400);
 
-        animatorSet.playTogether(imageScaleX, imageScaleY, imageFadeIn, imageFadeOut);
-        animatorSet.start();
+            animatorSet.playTogether(imageScaleX, imageScaleY, imageFadeIn, imageFadeOut);
+            animatorSet.start();
+        });
     }
 
     private void observeNavigation() {
