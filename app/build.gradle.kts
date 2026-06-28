@@ -78,6 +78,10 @@ dependencies {
     // Zip4j for password-protected zip extraction
     implementation("net.lingala.zip4j:zip4j:2.11.5")
 
+    // ZXing for QR code scanning
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.google.zxing:core:3.5.2")
+
     // WorkManager for background tasks
     implementation("androidx.work:work-runtime:2.9.0")
 

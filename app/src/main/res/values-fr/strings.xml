@@ -84,6 +84,11 @@
     <string name="edit_password">Modifier le mot de passe</string>
     <string name="update_password">Mettre à jour</string>
     <string name="new_password">Nouveau mot de passe</string>
+    <string name="qr_code">QR Code</string>
+    <string name="qr_code_scan_prompt">Scanner un QR code</string>
+    <string name="qr_code_success">Dépôt ajouté avec succès</string>
+    <string name="qr_code_invalid_url">URL invalide dans le QR code</string>
+    <string name="qr_code_error">Erreur lors de la lecture du QR code</string>
 
     <!-- Common -->
     <string name="error_generic">Une erreur s\'est produite</string>

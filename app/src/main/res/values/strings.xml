@@ -84,6 +84,11 @@
     <string name="edit_password">Edit password</string>
     <string name="update_password">Update</string>
     <string name="new_password">New password</string>
+    <string name="qr_code">QR Code</string>
+    <string name="qr_code_scan_prompt">Scan a QR code</string>
+    <string name="qr_code_success">Repository added successfully</string>
+    <string name="qr_code_invalid_url">Invalid URL in QR code</string>
+    <string name="qr_code_error">Error reading QR code</string>
 
     <!-- Common -->
     <string name="error_generic">An error occurred</string>

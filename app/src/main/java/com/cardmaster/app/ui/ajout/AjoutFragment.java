@@ -1,6 +1,7 @@
 package com.cardmaster.app.ui.ajout;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -25,6 +26,11 @@ import com.cardmaster.app.data.dao.BoosterDao;
 import com.cardmaster.app.data.entity.Booster;
 import com.cardmaster.app.data.entity.GitHubRepository;
 import com.cardmaster.app.data.preferences.UserPreferencesManager;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +44,7 @@ public class AjoutFragment extends Fragment {
     private List<GitHubRepository> filteredRepositories;
     private EditText searchEditText;
     private BoosterDao boosterDao;
+    private Button qrCodeButton;
 
     @Nullable
     @Override
@@ -61,6 +68,7 @@ public class AjoutFragment extends Fragment {
         repositoryRecyclerView = view.findViewById(R.id.repository_recycler_view);
         Button addButton = view.findViewById(R.id.add_repository_button);
         searchEditText = view.findViewById(R.id.search_edit_text);
+        qrCodeButton = view.findViewById(R.id.qr_code_button);
 
         repositories = new ArrayList<>();
         filteredRepositories = new ArrayList<>();
@@ -69,6 +77,7 @@ public class AjoutFragment extends Fragment {
         setupSearch();
 
         addButton.setOnClickListener(v -> showAddRepositoryDialog());
+        qrCodeButton.setOnClickListener(v -> startQRCodeScan());
     }
 
     private boolean isNetworkAvailable() {
@@ -203,5 +212,91 @@ public class AjoutFragment extends Fragment {
             saveRepositories();
         });
         dialog.show(getChildFragmentManager(), "EditPasswordDialog");
+    }
+
+    private void startQRCodeScan() {
+        IntentIntegrator integrator = IntentIntegrator.forSupportFragment(this);
+        integrator.setPrompt(getString(R.string.qr_code_scan_prompt));
+        integrator.setBeepEnabled(true);
+        integrator.setOrientationLocked(false);
+        integrator.initiateScan();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() != null) {
+                handleQRCodeResult(result.getContents());
+            } else {
+                Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void handleQRCodeResult(String qrData) {
+        try {
+            String url = null;
+            String password = null;
+
+            // Try JSON format first
+            if (qrData.trim().startsWith("{")) {
+                try {
+                    JSONObject json = new JSONObject(qrData);
+                    url = json.optString("url");
+                    password = json.optString("password");
+                } catch (JSONException e) {
+                    // Not valid JSON, try other formats
+                }
+            }
+
+            // Try pipe-separated format
+            if (url == null && qrData.contains("|")) {
+                String[] parts = qrData.split("\\|");
+                if (parts.length >= 2) {
+                    url = parts[0].trim();
+                    password = parts[1].trim();
+                }
+            }
+
+            // If still no URL, treat the whole string as URL
+            if (url == null) {
+                url = qrData.trim();
+            }
+
+            // Validate URL
+            if (!isValidUrl(url)) {
+                Toast.makeText(getContext(), R.string.qr_code_invalid_url, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // If we have both URL and password, add directly
+            if (password != null && !password.isEmpty()) {
+                GitHubRepository repository = new GitHubRepository(url, password);
+                repositories.add(repository);
+                filterRepositories(searchEditText.getText().toString());
+                saveRepositories();
+                Toast.makeText(getContext(), R.string.qr_code_success, Toast.LENGTH_SHORT).show();
+            } else {
+                // Only URL, show dialog to enter password
+                AddRepositoryDialog dialog = new AddRepositoryDialog();
+                dialog.setPreFilledUrl(url);
+                dialog.setListener((dialogUrl, dialogPassword) -> {
+                    if (isValidUrl(dialogUrl) && !dialogPassword.isEmpty()) {
+                        GitHubRepository repository = new GitHubRepository(dialogUrl, dialogPassword);
+                        repositories.add(repository);
+                        filterRepositories(searchEditText.getText().toString());
+                        saveRepositories();
+                    } else {
+                        Toast.makeText(getContext(), R.string.invalid_repository_url, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                dialog.show(getChildFragmentManager(), "AddRepositoryDialog");
+            }
+        } catch (Exception e) {
+            Toast.makeText(getContext(), R.string.qr_code_error, Toast.LENGTH_SHORT).show();
+        }
     }
 }

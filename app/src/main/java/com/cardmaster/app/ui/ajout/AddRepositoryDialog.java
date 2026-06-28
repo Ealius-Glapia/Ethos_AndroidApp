@@ -22,6 +22,7 @@ public class AddRepositoryDialog extends DialogFragment {
     private EditText passwordEditText;
     private Button validateButton;
     private OnRepositoryAddedListener listener;
+    private String preFilledUrl;
 
     public interface OnRepositoryAddedListener {
         void onRepositoryAdded(String url, String password);
@@ -29,6 +30,10 @@ public class AddRepositoryDialog extends DialogFragment {
 
     public void setListener(OnRepositoryAddedListener listener) {
         this.listener = listener;
+    }
+
+    public void setPreFilledUrl(String url) {
+        this.preFilledUrl = url;
     }
 
     @NonNull
@@ -41,6 +46,10 @@ public class AddRepositoryDialog extends DialogFragment {
         urlEditText = view.findViewById(R.id.url_edit_text);
         passwordEditText = view.findViewById(R.id.password_edit_text);
         validateButton = view.findViewById(R.id.validate_button);
+
+        if (preFilledUrl != null) {
+            urlEditText.setText(preFilledUrl);
+        }
 
         validateButton.setEnabled(false);
 
