@@ -89,6 +89,7 @@
     <string name="qr_code_success">Repository added successfully</string>
     <string name="qr_code_invalid_url">Invalid URL in QR code</string>
     <string name="qr_code_error">Error reading QR code</string>
+    <string name="booster_download_started">Downloading %s...</string>
 
     <!-- Common -->
     <string name="error_generic">An error occurred</string>

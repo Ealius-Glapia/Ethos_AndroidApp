@@ -196,6 +196,9 @@ public class ZipFilesFragment extends Fragment {
     }
 
     private void onZipFileClicked(String zipFileName) {
+        String boosterName = zipFileName.replace(".zip", "").replace("_", " ");
+        Toast.makeText(getContext(), getString(R.string.booster_download_started, boosterName), Toast.LENGTH_SHORT).show();
+        
         new ZipDownloadTask(requireContext()).downloadAndExtractZip(repository, zipFileName, new ZipDownloadTask.DownloadCallback() {
             @Override
             public void onDownloadComplete(String extractedPath) {

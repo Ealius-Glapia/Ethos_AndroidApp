@@ -89,6 +89,7 @@
     <string name="qr_code_success">Dépôt ajouté avec succès</string>
     <string name="qr_code_invalid_url">URL invalide dans le QR code</string>
     <string name="qr_code_error">Erreur lors de la lecture du QR code</string>
+    <string name="booster_download_started">Téléchargement de %s...</string>
 
     <!-- Common -->
     <string name="error_generic">Une erreur s\'est produite</string>
