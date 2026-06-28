@@ -101,6 +101,11 @@
     <string name="account_settings">Settings</string>
     <string name="account_vibration">Vibration</string>
     <string name="account_vibration_enabled">Enable vibration</string>
+    <string name="account_check_update">Check for updates</string>
+    <string name="account_checking_update">Checking for updates…</string>
+    <string name="account_update_available">Update available: %s</string>
+    <string name="account_update_not_available">You are using the latest version</string>
+    <string name="account_update_error">Error checking for updates</string>
     
     <!-- Notifications -->
     <string name="notification_booster_recharged_title">Booster Recharged!</string>

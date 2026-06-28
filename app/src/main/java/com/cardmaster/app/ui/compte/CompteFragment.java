@@ -2,14 +2,18 @@ package com.cardmaster.app.ui.compte;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +25,7 @@ import com.cardmaster.app.MainActivity;
 import com.cardmaster.app.R;
 import com.cardmaster.app.data.entity.UserCurrency;
 import com.cardmaster.app.data.preferences.UserPreferencesManager;
+import com.cardmaster.app.util.UpdateChecker;
 
 import java.util.Locale;
 
@@ -30,8 +35,11 @@ public class CompteFragment extends Fragment {
     private TextView creditsTextView;
     private RadioGroup languageRadioGroup;
     private CheckBox vibrationCheckbox;
+    private Button checkUpdateButton;
+    private TextView updateStatusText;
     private UserPreferencesManager preferencesManager;
     private String currentLanguage;
+    private UpdateChecker updateChecker;
 
     @Nullable
     @Override
@@ -50,7 +58,12 @@ public class CompteFragment extends Fragment {
         creditsTextView = view.findViewById(R.id.credits_display);
         languageRadioGroup = view.findViewById(R.id.language_radio_group);
         vibrationCheckbox = view.findViewById(R.id.vibration_checkbox);
-        
+        checkUpdateButton = view.findViewById(R.id.check_update_button);
+        updateStatusText = view.findViewById(R.id.update_status_text);
+
+        // Initialize update checker
+        updateChecker = new UpdateChecker();
+
         loadUsername();
         observeCredits();
 
@@ -59,6 +72,9 @@ public class CompteFragment extends Fragment {
 
         // Load vibration preference
         loadVibrationPreference();
+
+        // Set up update check button
+        checkUpdateButton.setOnClickListener(v -> checkForUpdates());
 
         // Set up individual radio button click listeners instead of RadioGroup listener
         // This prevents the listener from triggering on programmatic changes
@@ -153,5 +169,74 @@ public class CompteFragment extends Fragment {
     public void refreshLanguageUI() {
         // Reload all UI elements with new language
         loadUsername();
+    }
+
+    private void checkForUpdates() {
+        // Show checking status
+        checkUpdateButton.setEnabled(false);
+        updateStatusText.setVisibility(View.VISIBLE);
+        updateStatusText.setText(getString(R.string.account_checking_update));
+
+        try {
+            // Get current version from package manager
+            String currentVersion = requireContext().getPackageManager()
+                    .getPackageInfo(requireContext().getPackageName(), 0).versionName;
+
+            updateChecker.checkForUpdates(currentVersion, new UpdateChecker.UpdateCheckCallback() {
+                @Override
+                public void onUpdateAvailable(String latestVersion, String downloadUrl) {
+                    checkUpdateButton.setEnabled(true);
+                    updateStatusText.setText(getString(R.string.account_update_available, latestVersion));
+
+                    // Show toast with option to download
+                    if (downloadUrl != null) {
+                        Toast.makeText(requireContext(),
+                                getString(R.string.account_update_available, latestVersion),
+                                Toast.LENGTH_LONG).show();
+
+                        // Open download URL in browser
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
+                        startActivity(intent);
+                    } else {
+                        // No direct download link, open releases page
+                        Intent intent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("https://github.com/Ealius-Glapia/Ethos_AndroidApp/releases"));
+                        startActivity(intent);
+                    }
+                }
+
+                @Override
+                public void onNoUpdateAvailable() {
+                    checkUpdateButton.setEnabled(true);
+                    updateStatusText.setText(getString(R.string.account_update_not_available));
+                    Toast.makeText(requireContext(),
+                            getString(R.string.account_update_not_available),
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(String error) {
+                    checkUpdateButton.setEnabled(true);
+                    updateStatusText.setText(getString(R.string.account_update_error));
+                    Toast.makeText(requireContext(),
+                            getString(R.string.account_update_error),
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (Exception e) {
+            checkUpdateButton.setEnabled(true);
+            updateStatusText.setText(getString(R.string.account_update_error));
+            Toast.makeText(requireContext(),
+                    getString(R.string.account_update_error),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (updateChecker != null) {
+            updateChecker.shutdown();
+        }
     }
 }

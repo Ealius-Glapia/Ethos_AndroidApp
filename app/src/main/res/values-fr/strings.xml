@@ -100,6 +100,11 @@
     <string name="account_settings">Paramètres</string>
     <string name="account_vibration">Vibration</string>
     <string name="account_vibration_enabled">Activer la vibration</string>
+    <string name="account_check_update">Vérifier les mises à jour</string>
+    <string name="account_checking_update">Vérification des mises à jour…</string>
+    <string name="account_update_available">Mise à jour disponible : %s</string>
+    <string name="account_update_not_available">Vous utilisez la dernière version</string>
+    <string name="account_update_error">Erreur lors de la vérification des mises à jour</string>
 
     <!-- Card Swipe -->
     <string name="card_swipe_no_previous">Pas de carte précédente</string>
