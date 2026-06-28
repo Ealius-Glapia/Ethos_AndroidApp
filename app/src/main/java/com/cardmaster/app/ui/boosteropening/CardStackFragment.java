@@ -41,6 +41,8 @@ public class CardStackFragment extends Fragment {
     private TextView hintText;
     private boolean isAnimating = false;
     private android.animation.ValueAnimator periodicVibrationAnimator;
+    private int imagesLoadedCount = 0;
+    private int totalImagesToLoad = 0;
 
     private final List<Particle> mParticles = new ArrayList<>();
     private final android.os.Handler mParticleHandler = new android.os.Handler(android.os.Looper.getMainLooper());
@@ -79,18 +81,11 @@ public class CardStackFragment extends Fragment {
             if (cards != null) {
                 sortCardsByRarity();
                 cardViews = new ArrayList<>();
+                totalImagesToLoad = cards.size();
+                imagesLoadedCount = 0;
 
                 view.post(() -> {
                     createCardStack();
-                    updateHint();
-                    updateBackground();
-                    startParticleEffectsForVisibleCards();
-                    triggerVibrationForTopCard();
-
-                    cardStackContainer.setVisibility(View.VISIBLE);
-                    particleContainer.setVisibility(View.VISIBLE);
-                    backgroundView.setVisibility(View.VISIBLE);
-                    hintText.setVisibility(View.VISIBLE);
                 });
             }
         }
@@ -163,10 +158,41 @@ public class CardStackFragment extends Fragment {
         Glide.with(requireContext())
                 .load(imageFile)
                 .dontAnimate()
+                .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                        imagesLoadedCount++;
+                        checkAllImagesLoaded();
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                        imagesLoadedCount++;
+                        checkAllImagesLoaded();
+                        return false;
+                    }
+                })
                 .into(cardImage);
 
         wrapper.addView(cardImage);
         return wrapper;
+    }
+
+    private void checkAllImagesLoaded() {
+        if (imagesLoadedCount >= totalImagesToLoad) {
+            requireActivity().runOnUiThread(() -> {
+                updateHint();
+                updateBackground();
+                startParticleEffectsForVisibleCards();
+                triggerVibrationForTopCard();
+
+                cardStackContainer.setVisibility(View.VISIBLE);
+                particleContainer.setVisibility(View.VISIBLE);
+                backgroundView.setVisibility(View.VISIBLE);
+                hintText.setVisibility(View.VISIBLE);
+            });
+        }
     }
 
     private void updateBackground() {
