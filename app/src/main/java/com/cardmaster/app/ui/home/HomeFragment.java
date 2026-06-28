@@ -22,6 +22,7 @@ import com.cardmaster.app.R;
 import com.cardmaster.app.data.entity.Booster;
 import com.cardmaster.app.data.entity.BoosterCharge;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -95,7 +96,7 @@ public class HomeFragment extends Fragment {
     private void observeBoosters() {
         viewModel.getBoosters().observe(getViewLifecycleOwner(), boosters -> {
             if (boosters != null) {
-                adapter.submitList(boosters);
+                adapter.submitList(new ArrayList<>(boosters));
                 
                 if (boosters.isEmpty()) {
                     // No boosters available - hide charge info and show message
@@ -219,6 +220,28 @@ public class HomeFragment extends Fragment {
 
     private void onBoosterClicked(Booster booster) {
         android.util.Log.d("HomeFragment", "Booster clicked: " + booster.getId());
+        
+        // Move clicked booster to first position in carousel
+        List<Booster> currentList = new ArrayList<>(adapter.getCurrentList());
+        int clickedIndex = currentList.indexOf(booster);
+        
+        if (clickedIndex > 0) {
+            // Persist the order change to database
+            CardMasterApplication app = CardMasterApplication.getInstance();
+            
+            // Remove clicked booster and add it to front
+            currentList.remove(booster);
+            currentList.add(0, booster);
+            
+            // Update orderIndex for all boosters based on new order
+            for (int i = 0; i < currentList.size(); i++) {
+                Booster b = currentList.get(i);
+                app.getBoosterRepository().updateOrderIndex(b.getId(), i);
+            }
+        }
+        
+        adapter.submitList(currentList);
+        
         if (getActivity() instanceof BoosterClickListener) {
             ((BoosterClickListener) getActivity()).onBoosterClicked(booster.getId());
         }

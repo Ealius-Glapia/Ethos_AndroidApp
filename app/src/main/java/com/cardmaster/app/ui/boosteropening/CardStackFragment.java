@@ -26,10 +26,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 public class CardStackFragment extends Fragment {
+
     private static final String ARG_CARDS = "cards";
 
     private List<Card> cards;
@@ -41,12 +41,6 @@ public class CardStackFragment extends Fragment {
     private TextView hintText;
     private boolean isAnimating = false;
     private android.animation.ValueAnimator periodicVibrationAnimator;
-    private int imagesLoadedCount = 0;
-    private int totalImagesToLoad = 0;
-
-    private final List<Particle> mParticles = new ArrayList<>();
-    private final android.os.Handler mParticleHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-    private boolean mIsParticleAnimationRunning = false;
 
     public static CardStackFragment newInstance(List<Card> cards) {
         CardStackFragment fragment = new CardStackFragment();
@@ -75,17 +69,26 @@ public class CardStackFragment extends Fragment {
         particleContainer.setVisibility(View.INVISIBLE);
         backgroundView.setVisibility(View.INVISIBLE);
         hintText.setVisibility(View.INVISIBLE);
+        //cards = createDebugCards(); //DEBUG
 
         if (getArguments() != null) {
             cards = (List<Card>) getArguments().getSerializable(ARG_CARDS);
+            //cards = createDebugCards(); //DEBUG
             if (cards != null) {
                 sortCardsByRarity();
                 cardViews = new ArrayList<>();
-                totalImagesToLoad = cards.size();
-                imagesLoadedCount = 0;
 
                 view.post(() -> {
                     createCardStack();
+                    updateHint();
+                    updateBackground();
+                    startParticleEffectsForVisibleCards();
+                    triggerVibrationForTopCard();
+
+                    cardStackContainer.setVisibility(View.VISIBLE);
+                    particleContainer.setVisibility(View.VISIBLE);
+                    backgroundView.setVisibility(View.VISIBLE);
+                    hintText.setVisibility(View.VISIBLE);
                 });
             }
         }
@@ -158,41 +161,10 @@ public class CardStackFragment extends Fragment {
         Glide.with(requireContext())
                 .load(imageFile)
                 .dontAnimate()
-                .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
-                        imagesLoadedCount++;
-                        checkAllImagesLoaded();
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
-                        imagesLoadedCount++;
-                        checkAllImagesLoaded();
-                        return false;
-                    }
-                })
                 .into(cardImage);
 
         wrapper.addView(cardImage);
         return wrapper;
-    }
-
-    private void checkAllImagesLoaded() {
-        if (imagesLoadedCount >= totalImagesToLoad) {
-            requireActivity().runOnUiThread(() -> {
-                updateHint();
-                updateBackground();
-                startParticleEffectsForVisibleCards();
-                triggerVibrationForTopCard();
-
-                cardStackContainer.setVisibility(View.VISIBLE);
-                particleContainer.setVisibility(View.VISIBLE);
-                backgroundView.setVisibility(View.VISIBLE);
-                hintText.setVisibility(View.VISIBLE);
-            });
-        }
     }
 
     private void updateBackground() {
@@ -256,7 +228,7 @@ public class CardStackFragment extends Fragment {
             case 8:
                 // Niveau 9 : Fond BRONZE (Particules Silver #C0C0C0 par-dessus -> Très visible !)
                 drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
-                drawable.setColors(new int[]{Color.parseColor("#A36627"), Color.parseColor("#E5A65D"), Color.parseColor("#A36627") });
+                drawable.setColors(new int[]{Color.parseColor("#A36627"), Color.parseColor("#E5A65D"), Color.parseColor("#A36627")});
                 break;
             case 9:
                 // Niveau 10 : Fond SILVER (Particules Gold #FFD700 par-dessus -> Contraste maximal pour le niveau max !)
@@ -275,8 +247,6 @@ public class CardStackFragment extends Fragment {
     }
 
     private void startParticleEffectsForVisibleCards() {
-        mIsParticleAnimationRunning = false;
-        mParticles.clear();
         particleContainer.removeAllViews();
 
         if (currentIndex >= cards.size() || cardViews.isEmpty()) {
@@ -288,90 +258,46 @@ public class CardStackFragment extends Fragment {
         int upgrade = currentCard.getNumber();
         int templateLevel = rarity + upgrade;
 
-        if (templateLevel >= 8 && templateLevel <= 10) {
+        if (templateLevel == 8 || templateLevel == 9 || templateLevel == 10) {
             View currentCardView = cardViews.get(0);
-            mIsParticleAnimationRunning = true;
-
-            final int maxParticles = (templateLevel == 8) ? 150 : (templateLevel == 9) ? 250 : 450;
-            final int size = (templateLevel == 8) ? 10 : (templateLevel == 9) ? 14 : 18;
-            final String colorHex = (templateLevel == 10) ? "#CD7F32" : (templateLevel == 8 ? "#C0C0C0" : "#FFD700");
-            final int particleColor = Color.parseColor(colorHex);
-
-            int initialBurstCount = maxParticles / 3;
-            for (int i = 0; i < initialBurstCount; i++) {
-                generateParticleData(currentCardView, templateLevel, true, particleColor, size);
-            }
-
-            View canvasDrawingView = new View(requireContext()) {
-                private final android.graphics.Paint paint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-
-                @Override
-                protected void onDraw(android.graphics.Canvas canvas) {
-                    super.onDraw(canvas);
-                    synchronized (mParticles) {
-                        for (Particle p : mParticles) {
-                            paint.setColor(p.color);
-                            canvas.drawCircle(p.x, p.y, p.size / 2f, paint);
-                        }
-                    }
-                }
-            };
-
-            canvasDrawingView.setLayoutParams(new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            particleContainer.addView(canvasDrawingView);
-
-            Runnable spawnRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    if (!mIsParticleAnimationRunning || currentCardView.getParent() == null) return;
-
-                    if (mParticles.size() < maxParticles) {
-                        int spawnRate = (templateLevel == 10) ? 5 : 3;
-                        for (int i = 0; i < spawnRate; i++) {
-                            if (mParticles.size() < maxParticles) {
-                                generateParticleData(currentCardView, templateLevel, false, particleColor, size);
-                            }
-                        }
-                    }
-                    mParticleHandler.postDelayed(this, 30);
-                }
-            };
-
-            mParticleHandler.post(spawnRunnable);
-            particleContainer.postOnAnimation(mParticleUpdateRunnable);
+            startParticleEffect(currentCardView, templateLevel);
         }
     }
 
-    private final Runnable mParticleUpdateRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (!mIsParticleAnimationRunning || currentIndex >= cards.size()) {
-                return;
-            }
+    private void startParticleEffect(View cardView, int level) {
+        if (level < 8 || level > 10) return;
+        animateParticles(cardView, level);
+    }
 
-            long currentTime = System.currentTimeMillis();
-            Iterator<Particle> iterator = mParticles.iterator();
-            while (iterator.hasNext()) {
-                Particle p = iterator.next();
-                long elapsed = currentTime - p.startTime;
+    private void animateParticles(View cardView, int level) {
+        // 1. Augmentation significative du nombre maximal de particules
+        final int maxParticles = (level == 8) ? 150 : (level == 9) ? 250 : 450;
 
-                if (elapsed >= p.duration) {
-                    iterator.remove();
-                } else {
-                    float fraction = (float) elapsed / p.duration;
-                    p.x = p.startX + (p.endX - p.startX) * fraction;
-                    p.y = p.startY + (p.endY - p.startY) * fraction;
-                }
-            }
-
-            particleContainer.invalidate();
-
-            if (mIsParticleAnimationRunning) {
-                particleContainer.postOnAnimation(this);
-            }
+        // 2. EFFET "BURST" IMMÉDIAT : Génère des particules instantanément à l'apparition
+        // Moitié sur le point de départ extérieur pour éliminer le délai visuel
+        int initialBurstCount = maxParticles / 3;
+        for (int i = 0; i < initialBurstCount; i++) {
+            createSingleParticle(cardView, level, true);
         }
-    };
+
+        // 3. Système de flux continu (Spawn accéléré à 30ms pour plus de densité)
+        Runnable spawnRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (cardView.getParent() == null || currentIndex >= cards.size()) {
+                    return;
+                }
+
+                if (particleContainer.getChildCount() < maxParticles) {
+                    createSingleParticle(cardView, level, false);
+                }
+
+                particleContainer.postDelayed(this, 30);
+            }
+        };
+
+        particleContainer.post(spawnRunnable);
+    }
 
     private float[] getCardCenterInParticleContainer(View cardView) {
         int[] location = new int[2];
@@ -384,38 +310,62 @@ public class CardStackFragment extends Fragment {
         return new float[]{centerX, centerY};
     }
 
-    private void generateParticleData(View cardView, int level, boolean isInitialBurst, int color, int size) {
-        float[] cardCenter = getCardCenterInParticleContainer(cardView);
-        float startX = cardCenter[0];
-        float startY = cardCenter[1];
+    private void createSingleParticle(View cardView, int level, boolean isInitialBurst) {
+        final View particle = new View(requireContext());
+        int size = (level == 8) ? 10 : (level == 9) ? 14 : 18;
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(size, size);
+        particle.setLayoutParams(params);
 
-        float angle = (float) (Math.random() * 2 * Math.PI);
-        float distance = 1000 + (float) (Math.random() * 300);
-        long duration = 2000 + (long) (Math.random() * 500);
+        // FORMULAIRE DES PARTICULES : Transformation en Cercles Parfaits
+        GradientDrawable circleDrawable = new GradientDrawable();
+        circleDrawable.setShape(GradientDrawable.OVAL);
+        String particleColor = (level == 10) ? "#CD7F32" : (level == 8 ? "#C0C0C0" : "#FFD700");
+        circleDrawable.setColor(Color.parseColor(particleColor));
+        particle.setBackground(circleDrawable);
+        particle.setAlpha(1.0f);
 
-        if (isInitialBurst) {
-            float offset = 250f + (float) (Math.random() * 150f);
-            startX += (float) (Math.cos(angle) * offset);
-            startY += (float) (Math.sin(angle) * offset);
-            duration = (long) (duration * 0.7);
-        }
+        particleContainer.addView(particle);
 
-        Particle p = new Particle();
-        p.startX = startX;
-        p.startY = startY;
-        p.x = startX;
-        p.y = startY;
-        p.endX = startX + (float) (Math.cos(angle) * distance);
-        p.endY = startY + (float) (Math.sin(angle) * distance);
-        p.angle = angle;
-        p.startTime = System.currentTimeMillis();
-        p.duration = duration;
-        p.color = color;
-        p.size = size;
+        final float angle = (float) (Math.random() * 2 * Math.PI);
+        final float distance = 1000 + (float) (Math.random() * 300);
+        final long duration = 2000 + (long) (Math.random() * 500);
 
-        synchronized (mParticles) {
-            mParticles.add(p);
-        }
+        particle.postDelayed(() -> {
+            float[] cardCenter = getCardCenterInParticleContainer(cardView);
+            float startX = cardCenter[0] - size / 2f;
+            float startY = cardCenter[1] - size / 2f;
+
+            // Si c'est le burst initial, on décale directement l'origine vers les bords de la carte
+            if (isInitialBurst) {
+                float offset = 250f + (float) (Math.random() * 150f);
+                startX += (float) (Math.cos(angle) * offset);
+                startY += (float) (Math.sin(angle) * offset);
+            }
+
+            particle.setX(startX);
+            particle.setY(startY);
+
+            float endX = startX + (float) (Math.cos(angle) * distance);
+            float endY = startY + (float) (Math.sin(angle) * distance);
+
+            AnimatorSet anim = new AnimatorSet();
+            anim.playTogether(
+                    ObjectAnimator.ofFloat(particle, "x", endX),
+                    ObjectAnimator.ofFloat(particle, "y", endY)
+            );
+
+            anim.setDuration(isInitialBurst ? (long) (duration * 0.7) : duration);
+            anim.addListener(new android.animation.AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    particleContainer.removeView(particle);
+                    if (cardView.getParent() != null && currentIndex < cards.size()) {
+                        createSingleParticle(cardView, level, false);
+                    }
+                }
+            });
+            anim.start();
+        }, 0);
     }
 
     // GESTION DES VIBRATIONS : Cycle rapide et agressif (Niv 10) vs Standard (Niv 9)
@@ -437,7 +387,7 @@ public class CardStackFragment extends Fragment {
                 // Configuration selon le palier d'intensité
                 final long loopDuration = (templateLevel == 10) ? 1400 : 3000; // Fréquence beaucoup plus haute pour le niveau 10 (1.4s vs 3s)
                 final float activeWindow = (templateLevel == 10) ? 0.35f : 0.13f; // Fenêtre d'oscillation active prolongée
-                final float shakeIntensity = (templateLevel == 10) ? 45f : 20f;   // Amplitude violente (45px) vs douce (20px)
+                final float shakeIntensity = (templateLevel == 10) ? 45f : 20f; // Amplitude violente (45px) vs douce (20px)
                 final double frequencyMultiplier = (templateLevel == 10) ? 9.0 : 5.0; // Oscillations plus nerveuses
 
                 periodicVibrationAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
@@ -535,9 +485,6 @@ public class CardStackFragment extends Fragment {
                     periodicVibrationAnimator.cancel();
                 }
 
-                mIsParticleAnimationRunning = false;
-                mParticleHandler.removeCallbacksAndMessages(null);
-
                 cardStackContainer.removeView(cardView);
                 cardViews.remove(cardView);
                 currentIndex++;
@@ -574,16 +521,5 @@ public class CardStackFragment extends Fragment {
         if (getActivity() instanceof BoosterOpeningFragment.BoosterOpenListener) {
             ((BoosterOpeningFragment.BoosterOpenListener) getActivity()).onBoosterOpened(cards);
         }
-    }
-
-    private static class Particle {
-        float x, y;
-        float startX, startY;
-        float endX, endY;
-        float angle;
-        long startTime;
-        long duration;
-        int color;
-        float size;
     }
 }

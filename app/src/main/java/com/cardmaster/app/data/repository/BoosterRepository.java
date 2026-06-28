@@ -49,6 +49,10 @@ public class BoosterRepository {
         executor.execute(() -> boosterDao.updateStatus(boosterId, status));
     }
 
+    public void updateOrderIndex(int boosterId, int orderIndex) {
+        executor.execute(() -> boosterDao.updateOrderIndex(boosterId, orderIndex));
+    }
+
     public void shutdown() {
         executor.shutdown();
     }

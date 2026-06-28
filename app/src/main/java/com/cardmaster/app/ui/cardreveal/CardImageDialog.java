@@ -31,7 +31,6 @@ public class CardImageDialog extends DialogFragment {
     private List<Card> cardsList;
     private boolean fromCollection;
     private PhotoView cardImageView;
-    private float initialX;
 
     public static CardImageDialog newInstance(Card card) {
         CardImageDialog dialog = new CardImageDialog();
@@ -71,6 +70,18 @@ public class CardImageDialog extends DialogFragment {
 
         cardImageView = view.findViewById(R.id.card_image_full);
 
+        // Configure PhotoView zoom limits
+        cardImageView.setMinimumScale(1.0f); // Prevent zooming below initial size
+        cardImageView.setMediumScale(2.0f); // Medium zoom level
+        cardImageView.setMaximumScale(4.0f); // Maximum zoom level
+
+        // Add scale change listener to enforce minimum scale during pinch
+        cardImageView.setOnScaleChangeListener((scaleFactor, focusX, focusY) -> {
+            if (cardImageView.getScale() < 1.0f) {
+                cardImageView.setScale(1.0f, focusX, focusY, true);
+            }
+        });
+
         if (card != null && card.getImageUrl() != null) {
             java.io.File imageFile = new java.io.File(card.getImageUrl());
             Glide.with(requireContext())
@@ -90,26 +101,25 @@ public class CardImageDialog extends DialogFragment {
     }
 
     private void setupSwipeGesture() {
-        cardImageView.setOnTouchListener((v, event) -> {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    initialX = event.getX();
-                    return true;
+        // Use PhotoView's built-in setOnSingleFlingListener to handle swipes
+        // This allows PhotoView to handle zoom (double-tap, pinch) normally
+        cardImageView.setOnSingleFlingListener((e1, e2, velocityX, velocityY) -> {
+            // Only handle swipe if not zoomed
+            if (cardImageView.getScale() != 1.0f) {
+                return false;
+            }
 
-                case MotionEvent.ACTION_UP:
-                    float deltaX = event.getX() - initialX;
+            float deltaX = e2.getX() - e1.getX();
 
-                    if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
-                        if (deltaX > 0) {
-                            // Swipe right - move to previous card (lower sum)
-                            moveToPreviousBooster();
-                        } else {
-                            // Swipe left - move to next card (higher sum)
-                            moveToNextBooster();
-                        }
-                        return true;
-                    }
-                    return false;
+            if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+                if (deltaX > 0) {
+                    // Swipe right - move to previous card (lower sum)
+                    moveToPreviousBooster();
+                } else {
+                    // Swipe left - move to next card (higher sum)
+                    moveToNextBooster();
+                }
+                return true;
             }
             return false;
         });

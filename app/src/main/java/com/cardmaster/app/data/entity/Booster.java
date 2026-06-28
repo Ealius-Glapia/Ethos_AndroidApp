@@ -14,6 +14,7 @@ public class Booster implements Serializable {
     private int totalCards;
     private String releaseDate;
     private String status; // "active", "soft_deleted", "hard_deleted"
+    private int orderIndex; // For carousel ordering
 
     public Booster(int id, String name, String artworkUrl, int totalCards, String releaseDate) {
         this.id = id;
@@ -22,6 +23,7 @@ public class Booster implements Serializable {
         this.totalCards = totalCards;
         this.releaseDate = releaseDate;
         this.status = "active";
+        this.orderIndex = 0;
     }
 
     public int getId() {
@@ -70,5 +72,13 @@ public class Booster implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(int orderIndex) {
+        this.orderIndex = orderIndex;
     }
 }

@@ -18,7 +18,7 @@ public interface BoosterDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Booster booster);
 
-    @Query("SELECT * FROM boosters ORDER BY releaseDate DESC")
+    @Query("SELECT * FROM boosters ORDER BY orderIndex ASC")
     LiveData<List<Booster>> getAllBoosters();
 
     @Query("SELECT * FROM boosters WHERE id = :boosterId")
@@ -33,9 +33,12 @@ public interface BoosterDao {
     @Query("UPDATE boosters SET status = :status WHERE id = :boosterId")
     void updateStatus(int boosterId, String status);
 
-    @Query("SELECT * FROM boosters ORDER BY releaseDate DESC")
+    @Query("SELECT * FROM boosters ORDER BY orderIndex ASC")
     List<Booster> getAllBoostersSync();
 
-    @Query("SELECT * FROM boosters WHERE status != 'active' ORDER BY releaseDate DESC")
+    @Query("SELECT * FROM boosters WHERE status != 'active' ORDER BY orderIndex ASC")
     List<Booster> getInactiveBoostersSync();
+
+    @Query("UPDATE boosters SET orderIndex = :orderIndex WHERE id = :boosterId")
+    void updateOrderIndex(int boosterId, int orderIndex);
 }
