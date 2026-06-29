@@ -17,6 +17,8 @@
     <string name="nav_ajout">Ajout</string>
     <string name="nav_compte">Compte</string>
     <string name="nav_marche">Marché</string>
+    <string name="nav_favorites">Favoris</string>
+    <string name="back">Retour</string>
     
     <!-- Home -->
     <string name="home_boosters_title">Boosters</string>
@@ -96,6 +98,8 @@
     <string name="loading">Chargement…</string>
     <string name="page_title_compte">Compte</string>
     <string name="page_title_marche">Marché</string>
+    <string name="page_title_collection">Collection</string>
+    <string name="page_title_success">Succès</string>
     
     <!-- Account -->
     <string name="account_username">Nom d\'utilisateur</string>

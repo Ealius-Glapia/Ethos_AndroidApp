@@ -40,6 +40,7 @@ public class CompteFragment extends Fragment {
     private UserPreferencesManager preferencesManager;
     private String currentLanguage;
     private UpdateChecker updateChecker;
+    private android.widget.ImageButton backButton;
 
     @Nullable
     @Override
@@ -60,9 +61,17 @@ public class CompteFragment extends Fragment {
         vibrationCheckbox = view.findViewById(R.id.vibration_checkbox);
         checkUpdateButton = view.findViewById(R.id.check_update_button);
         updateStatusText = view.findViewById(R.id.update_status_text);
+        backButton = view.findViewById(R.id.back_button);
 
         // Initialize update checker
         updateChecker = new UpdateChecker();
+
+        // Set up back button
+        backButton.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).navigateToMain();
+            }
+        });
 
         loadUsername();
         observeCredits();

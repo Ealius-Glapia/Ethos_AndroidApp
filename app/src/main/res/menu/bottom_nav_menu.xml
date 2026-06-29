@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/navigation_compte"
-        android:icon="@drawable/ic_friends"
-        android:title="@string/nav_compte" />
+        android:id="@+id/navigation_ajout"
+        android:icon="@drawable/ic_add"
+        android:title="@string/nav_ajout" />
     <item
         android:id="@+id/navigation_marche"
         android:icon="@drawable/ic_market"
@@ -17,7 +17,7 @@
         android:icon="@drawable/ic_gallery"
         android:title="@string/nav_collection" />
     <item
-        android:id="@+id/navigation_ajout"
-        android:icon="@drawable/ic_add"
-        android:title="@string/nav_ajout" />
+        android:id="@+id/navigation_favorites"
+        android:icon="@drawable/ic_favorites"
+        android:title="@string/nav_favorites" />
 </menu>

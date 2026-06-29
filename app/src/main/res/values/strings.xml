@@ -17,6 +17,8 @@
     <string name="nav_ajout">Add</string>
     <string name="nav_compte">Account</string>
     <string name="nav_marche">Market</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="back">Back</string>
     
     <!-- Home -->
     <string name="home_boosters_title">Boosters</string>
@@ -97,6 +99,7 @@
     <string name="page_title_compte">Account</string>
     <string name="page_title_marche">Market</string>
     <string name="page_title_collection">Collection</string>
+    <string name="page_title_success">Success</string>
     
     <!-- Account -->
     <string name="account_username">Username</string>

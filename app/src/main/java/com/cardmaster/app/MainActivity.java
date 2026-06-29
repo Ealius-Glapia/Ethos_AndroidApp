@@ -30,10 +30,12 @@ import com.cardmaster.app.ui.compte.CompteFragment;
 import com.cardmaster.app.ui.boosteropening.BoosterOpeningFragment;
 import com.cardmaster.app.ui.cardreveal.CardRevealFragment;
 import com.cardmaster.app.ui.collection.CollectionFragment;
+import com.cardmaster.app.ui.favorites.FavoritesFragment;
 import com.cardmaster.app.ui.home.HomeFragment;
 import com.cardmaster.app.ui.login.LoginFragment;
 import com.cardmaster.app.ui.marche.MarcheFragment;
 import com.cardmaster.app.ui.splash.SplashFragment;
+import com.cardmaster.app.ui.success.SuccessFragment;
 import com.cardmaster.app.data.entity.Card;
 import com.cardmaster.app.work.AlarmScheduler;
 
@@ -83,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements
         tokenCountText = binding.tokenDisplay.tokenCount;
         setupNavigation();
         setupBottomNavigation();
+        setupAccountButton();
+        setupSuccessButton();
         observeTokenCount();
 
         if (savedInstanceState == null) {
@@ -134,28 +138,56 @@ public class MainActivity extends AppCompatActivity implements
     private void setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
-            if (itemId == R.id.navigation_compte) {
-                showFragment(new CompteFragment());
-                binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
-                return true;
-            } else if (itemId == R.id.navigation_marche) {
+            if (itemId == R.id.navigation_marche) {
                 showFragment(new MarcheFragment());
                 binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+                binding.accountButton.setVisibility(View.VISIBLE);
+                binding.successButton.setVisibility(View.GONE);
                 return true;
             } else if (itemId == R.id.navigation_home) {
                 showFragment(new HomeFragment());
                 binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+                binding.accountButton.setVisibility(View.VISIBLE);
+                binding.successButton.setVisibility(View.VISIBLE);
                 return true;
             } else if (itemId == R.id.navigation_collection) {
                 showFragment(new CollectionFragment());
                 binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+                binding.accountButton.setVisibility(View.VISIBLE);
+                binding.successButton.setVisibility(View.GONE);
                 return true;
             } else if (itemId == R.id.navigation_ajout) {
                 showFragment(new AjoutFragment());
                 binding.tokenDisplay.getRoot().setVisibility(View.GONE);
+                binding.accountButton.setVisibility(View.GONE);
+                binding.successButton.setVisibility(View.GONE);
+                return true;
+            } else if (itemId == R.id.navigation_favorites) {
+                showFragment(new FavoritesFragment());
+                binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+                binding.accountButton.setVisibility(View.VISIBLE);
+                binding.successButton.setVisibility(View.GONE);
                 return true;
             }
             return false;
+        });
+    }
+
+    private void setupAccountButton() {
+        binding.accountButton.setOnClickListener(v -> {
+            showFragment(new CompteFragment());
+            binding.tokenDisplay.getRoot().setVisibility(View.GONE);
+            binding.accountButton.setVisibility(View.GONE);
+            binding.successButton.setVisibility(View.GONE);
+        });
+    }
+
+    private void setupSuccessButton() {
+        binding.successButton.setOnClickListener(v -> {
+            showFragment(new SuccessFragment());
+            binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+            binding.accountButton.setVisibility(View.GONE);
+            binding.successButton.setVisibility(View.GONE);
         });
     }
 
@@ -208,6 +240,8 @@ public class MainActivity extends AppCompatActivity implements
     public void navigateToMain() {
         showBottomNavigation();
         binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+        binding.accountButton.setVisibility(View.VISIBLE);
+        binding.successButton.setVisibility(View.VISIBLE);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.nav_host_fragment, new HomeFragment())
                 .commit();
