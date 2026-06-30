@@ -8,11 +8,13 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import com.cardmaster.app.data.dao.AchievementDao;
 import com.cardmaster.app.data.dao.BoosterChargeDao;
 import com.cardmaster.app.data.dao.BoosterDao;
 import com.cardmaster.app.data.dao.CardDao;
 import com.cardmaster.app.data.dao.OwnedCardDao;
 import com.cardmaster.app.data.dao.UserCurrencyDao;
+import com.cardmaster.app.data.entity.Achievement;
 import com.cardmaster.app.data.entity.Booster;
 import com.cardmaster.app.data.entity.BoosterCharge;
 import com.cardmaster.app.data.entity.Card;
@@ -20,8 +22,8 @@ import com.cardmaster.app.data.entity.OwnedCard;
 import com.cardmaster.app.data.entity.UserCurrency;
 
 @Database(
-    entities = {Booster.class, Card.class, OwnedCard.class, UserCurrency.class, BoosterCharge.class},
-    version = 6,
+    entities = {Booster.class, Card.class, OwnedCard.class, UserCurrency.class, BoosterCharge.class, Achievement.class},
+    version = 8,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -32,6 +34,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract OwnedCardDao ownedCardDao();
     public abstract UserCurrencyDao userCurrencyDao();
     public abstract BoosterChargeDao boosterChargeDao();
+    public abstract AchievementDao achievementDao();
 
     public static synchronized AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
@@ -40,7 +43,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 AppDatabase.class,
                 "cardmaster_database"
             ).allowMainThreadQueries()
-             .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+             .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
              .build();
         }
         return INSTANCE;
@@ -79,6 +82,50 @@ public abstract class AppDatabase extends RoomDatabase {
             
             // Rename new table to old name
             database.execSQL("ALTER TABLE boosters_new RENAME TO boosters");
+        }
+    };
+
+    private static final Migration MIGRATION_6_7 = new Migration(6, 7) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            // Drop old achievements table if exists
+            database.execSQL("DROP TABLE IF EXISTS achievements");
+            
+            // Create achievements table with new schema including legacy string fields
+            database.execSQL("CREATE TABLE IF NOT EXISTS achievements (" +
+                           "id INTEGER PRIMARY KEY NOT NULL, " +
+                           "titleResId INTEGER, " +
+                           "descriptionResId INTEGER, " +
+                           "conditionType TEXT, " +
+                           "conditionValue INTEGER NOT NULL, " +
+                           "rewardType TEXT, " +
+                           "rewardValue INTEGER NOT NULL, " +
+                           "isClaimed INTEGER NOT NULL DEFAULT 0, " +
+                           "cardProbabilitiesJson TEXT, " +
+                           "title TEXT, " +
+                           "description TEXT)");
+        }
+    };
+
+    private static final Migration MIGRATION_7_8 = new Migration(7, 8) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            // Drop old achievements table if it exists with wrong schema
+            database.execSQL("DROP TABLE IF EXISTS achievements");
+            
+            // Create achievements table with correct schema including all fields
+            database.execSQL("CREATE TABLE IF NOT EXISTS achievements (" +
+                           "id INTEGER PRIMARY KEY NOT NULL, " +
+                           "titleResId INTEGER, " +
+                           "descriptionResId INTEGER, " +
+                           "conditionType TEXT, " +
+                           "conditionValue INTEGER NOT NULL, " +
+                           "rewardType TEXT, " +
+                           "rewardValue INTEGER NOT NULL, " +
+                           "isClaimed INTEGER NOT NULL DEFAULT 0, " +
+                           "cardProbabilitiesJson TEXT, " +
+                           "title TEXT, " +
+                           "description TEXT)");
         }
     };
 

@@ -8,72 +8,86 @@
     android:padding="16dp"
     tools:context=".ui.boosterselection.BoosterSelectionFragment">
 
-    <ImageView
-        android:id="@+id/booster_image"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="16dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toTopOf="@+id/booster_name"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/ic_launcher_foreground" />
-
     <TextView
-        android:id="@+id/booster_name"
+        android:id="@+id/title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
+        android:text="@string/home_boosters_title"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/md_theme_onBackground"
-        app:layout_constraintBottom_toTopOf="@+id/remaining_text"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:text="Starter Pack" />
-
-    <TextView
-        android:id="@+id/remaining_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textSize="16sp"
-        android:textColor="@color/md_theme_onSurface"
-        app:layout_constraintBottom_toTopOf="@+id/completion_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:text="Remaining: 5" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/completion_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textSize="16sp"
-        android:textColor="@color/md_theme_onSurface"
-        app:layout_constraintBottom_toTopOf="@+id/completion_bar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:text="50% Complete" />
-
-    <ProgressBar
-        android:id="@+id/completion_bar"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/booster_pager"
         android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:paddingStart="48dp"
+        android:paddingEnd="48dp"
+        app:layout_constraintBottom_toTopOf="@+id/booster_info"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_text"/>
+
+    <LinearLayout
+        android:id="@+id/booster_info"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:max="100"
-        android:progressTint="@color/md_theme_primary"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="12dp"
+        android:background="@drawable/rounded_white_background"
         app:layout_constraintBottom_toTopOf="@+id/open_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:progress="50" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/booster_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/md_theme_onSurface"
+            tools:text="Starter Pack" />
+
+        <TextView
+            android:id="@+id/remaining_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="@color/md_theme_onSurface"
+            tools:text="Remaining: 5" />
+
+        <TextView
+            android:id="@+id/completion_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="@color/md_theme_onSurface"
+            tools:text="50% Complete" />
+
+        <ProgressBar
+            android:id="@+id/completion_bar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:max="100"
+            android:progressTint="@color/md_theme_primary"
+            tools:progress="50" />
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/open_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:text="Open Booster"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

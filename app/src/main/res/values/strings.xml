@@ -126,4 +126,16 @@
     <string name="card_swipe_no_previous">No previous card</string>
     <string name="card_swipe_no_next">No next card</string>
     <string name="card_swipe_navigation_error">Navigation error</string>
+
+    <!-- Achievements -->
+    <string name="claim">Claim</string>
+    <string name="claimed">Claimed</string>
+    <string name="achievement_10_cards_title">Unlock 10 cards</string>
+    <string name="achievement_10_cards_description">Unlock 10 different cards</string>
+    <string name="achievement_100_cards_title">Unlock 100 cards</string>
+    <string name="achievement_100_cards_description">Unlock 100 different cards</string>
+    <string name="achievement_500_cards_title">Unlock 500 cards</string>
+    <string name="achievement_500_cards_description">Unlock 500 different cards</string>
+    <string name="achievement_all_levels_title">Complete all levels 1-9</string>
+    <string name="achievement_all_levels_description">Unlock at least one card of each level from 1 to 9 in rare rarity</string>
 </resources>

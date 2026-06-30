@@ -27,6 +27,7 @@ import java.util.List;
 
 public class BoosterOpeningFragment extends Fragment {
     private static final String ARG_BOOSTER_ID = "boosterId";
+    private static final String ARG_ACHIEVEMENT_ID = "achievementId";
     
     private BoosterOpeningViewModel viewModel;
     private ImageView packImage;
@@ -35,11 +36,21 @@ public class BoosterOpeningFragment extends Fragment {
     private float initialY;
     private boolean isOpening = false;
     private CardMasterApplication app;
+    private int achievementId;
 
     public static BoosterOpeningFragment newInstance(int boosterId) {
         BoosterOpeningFragment fragment = new BoosterOpeningFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_BOOSTER_ID, boosterId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static BoosterOpeningFragment newInstanceForAchievement(int boosterId, int achievementId) {
+        BoosterOpeningFragment fragment = new BoosterOpeningFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_BOOSTER_ID, boosterId);
+        args.putInt(ARG_ACHIEVEMENT_ID, achievementId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -62,7 +73,9 @@ public class BoosterOpeningFragment extends Fragment {
         hintTextView = view.findViewById(R.id.hint_text);
         
         int boosterId = getArguments() != null ? getArguments().getInt(ARG_BOOSTER_ID, 1) : 1;
+        achievementId = getArguments() != null ? getArguments().getInt(ARG_ACHIEVEMENT_ID, -1) : -1;
         viewModel.setBoosterId(boosterId);
+        viewModel.setAchievementId(achievementId);
         
         loadBoosterImage(boosterId);
         setupPackAnimations();

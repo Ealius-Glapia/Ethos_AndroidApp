@@ -47,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements
         LoginFragment.NavigationListener,
         HomeFragment.BoosterClickListener,
         BoosterOpeningFragment.BoosterOpenListener,
-        CardRevealFragment.CardRevealListener {
+        CardRevealFragment.CardRevealListener,
+        com.cardmaster.app.ui.boosterselection.BoosterSelectionFragment.BoosterOpenListener {
 
     private static final int PERMISSION_REQUEST_CODE = 1001;
     private static final int ALARM_PERMISSION_REQUEST_CODE = 1002;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements
     private NavController navController;
     private boolean isMainNavigationVisible = false;
     private TextView tokenCountText;
+    private int currentAchievementId = -1; // Track if opening booster for achievement
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -277,8 +279,10 @@ public class MainActivity extends AppCompatActivity implements
         long currentTime = System.currentTimeMillis();
         java.util.Map<Integer, Integer> tokenGains = new java.util.HashMap<>();
 
-        // Decrement booster charge
-        app.getBoosterChargeRepository().useBooster();
+        // Decrement booster charge only if not an achievement reward
+        if (currentAchievementId == -1) {
+            app.getBoosterChargeRepository().useBooster();
+        }
 
         for (Card card : cards) {
             // Check if card already exists BEFORE inserting
@@ -307,6 +311,14 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
 
+        // Mark achievement as claimed if this was an achievement reward
+        if (currentAchievementId != -1) {
+            android.util.Log.d("MainActivity", "Achievement reward completed: " + currentAchievementId);
+            // CHEAT MODE: Don't mark as claimed to allow unlimited claiming
+            // Comment out this line to disable unlimited claiming
+            // app.getAchievementRepository().markAsClaimed(currentAchievementId);
+        }
+
         CardRevealFragment fragment = CardRevealFragment.newInstance(cards, tokenGains);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.nav_host_fragment, fragment)
@@ -316,12 +328,60 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onContinue(List<Card> cards) {
-        // Cards are already saved in onBoosterOpened, just navigate back to home
-        android.util.Log.d("MainActivity", "onContinue called - navigating back to home");
-        getSupportFragmentManager().popBackStack();
-        getSupportFragmentManager().popBackStack(); // Go back to home
-        // Don't set selected item here to avoid navigation conflicts
-        binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+        // Cards are already saved in onBoosterOpened, navigate based on context
+        android.util.Log.d("MainActivity", "onContinue called - currentAchievementId: " + currentAchievementId);
+        
+        if (currentAchievementId != -1) {
+            // Return to achievements screen after achievement reward
+            getSupportFragmentManager().popBackStack(); // Go back to booster selection
+            getSupportFragmentManager().popBackStack(); // Go back to achievements
+            currentAchievementId = -1; // Reset achievement context
+            binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+            binding.accountButton.setVisibility(View.GONE);
+            binding.successButton.setVisibility(View.GONE);
+        } else {
+            // Normal flow - navigate back to home
+            getSupportFragmentManager().popBackStack();
+            getSupportFragmentManager().popBackStack(); // Go back to home
+            binding.tokenDisplay.getRoot().setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onOpenBooster(int boosterId) {
+        // This is called from BoosterSelectionFragment for normal booster opening
+        CardMasterApplication app = CardMasterApplication.getInstance();
+        com.cardmaster.app.data.entity.BoosterCharge boosterCharge = app.getBoosterChargeRepository().getBoosterChargeSync();
+        
+        android.util.Log.d("MainActivity", "Booster clicked. Current charge: " + (boosterCharge != null ? boosterCharge.getCurrentCharge() : "null"));
+        
+        if (boosterCharge != null && boosterCharge.getCurrentCharge() > 0) {
+            binding.tokenDisplay.getRoot().setVisibility(View.GONE);
+            BoosterOpeningFragment fragment = BoosterOpeningFragment.newInstance(boosterId);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.nav_host_fragment, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        } else {
+            android.util.Log.d("MainActivity", "Cannot open booster - no charges available");
+            android.widget.Toast.makeText(this, getString(R.string.home_no_openings_available), android.widget.Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onOpenBoosterForAchievement(int boosterId, int achievementId) {
+        currentAchievementId = achievementId;
+        CardMasterApplication app = CardMasterApplication.getInstance();
+        
+        android.util.Log.d("MainActivity", "Achievement booster clicked. Achievement ID: " + achievementId + ", Booster ID: " + boosterId);
+        
+        // Achievement rewards are free - no charge consumption
+        binding.tokenDisplay.getRoot().setVisibility(View.GONE);
+        BoosterOpeningFragment fragment = BoosterOpeningFragment.newInstanceForAchievement(boosterId, achievementId);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.nav_host_fragment, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override

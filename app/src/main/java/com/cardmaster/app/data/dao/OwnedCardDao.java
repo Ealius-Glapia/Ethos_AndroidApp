@@ -35,6 +35,9 @@ public interface OwnedCardDao {
     @Query("SELECT * FROM cards WHERE id IN (SELECT DISTINCT cardId FROM owned_cards)")
     LiveData<List<Card>> getOwnedCardsList();
 
+    @Query("SELECT * FROM cards WHERE id IN (SELECT DISTINCT cardId FROM owned_cards)")
+    List<Card> getOwnedCardsListSync();
+
     @Query("SELECT COUNT(*) FROM owned_cards WHERE cardId = :cardId")
     LiveData<Integer> getQuantityByCardId(int cardId);
 
@@ -43,6 +46,9 @@ public interface OwnedCardDao {
 
     @Query("SELECT COUNT(DISTINCT cardId) FROM owned_cards")
     LiveData<Integer> getTotalUniqueCards();
+
+    @Query("SELECT COUNT(DISTINCT cardId) FROM owned_cards")
+    int getTotalUniqueCardsSync();
 
     @Query("SELECT COUNT(DISTINCT cardId) FROM owned_cards WHERE cardId IN (SELECT id FROM cards WHERE boosterId IN (SELECT id FROM boosters WHERE status != 'hard_deleted'))")
     LiveData<Integer> getLoadedUniqueCards();

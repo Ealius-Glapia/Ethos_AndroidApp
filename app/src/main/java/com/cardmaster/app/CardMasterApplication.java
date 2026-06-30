@@ -9,12 +9,14 @@ import android.provider.Settings;
 
 import com.cardmaster.app.data.database.AppDatabase;
 import com.cardmaster.app.data.database.DatabaseInitializer;
+import com.cardmaster.app.data.dao.AchievementDao;
 import com.cardmaster.app.data.dao.BoosterChargeDao;
 import com.cardmaster.app.data.dao.BoosterDao;
 import com.cardmaster.app.data.dao.CardDao;
 import com.cardmaster.app.data.dao.OwnedCardDao;
 import com.cardmaster.app.data.dao.UserCurrencyDao;
 import com.cardmaster.app.data.preferences.UserPreferencesManager;
+import com.cardmaster.app.data.repository.AchievementRepository;
 import com.cardmaster.app.data.repository.BoosterChargeRepository;
 import com.cardmaster.app.data.repository.BoosterRepository;
 import com.cardmaster.app.data.repository.CardRepository;
@@ -31,6 +33,7 @@ public class CardMasterApplication extends Application {
     private OwnedCardRepository ownedCardRepository;
     private UserCurrencyRepository userCurrencyRepository;
     private BoosterChargeRepository boosterChargeRepository;
+    private AchievementRepository achievementRepository;
     private UserPreferencesManager preferencesManager;
     private DatabaseInitializer databaseInitializer;
 
@@ -45,12 +48,14 @@ public class CardMasterApplication extends Application {
         OwnedCardDao ownedCardDao = database.ownedCardDao();
         UserCurrencyDao userCurrencyDao = database.userCurrencyDao();
         BoosterChargeDao boosterChargeDao = database.boosterChargeDao();
+        AchievementDao achievementDao = database.achievementDao();
 
         boosterRepository = new BoosterRepository(boosterDao);
         cardRepository = new CardRepository(cardDao);
         ownedCardRepository = new OwnedCardRepository(ownedCardDao);
         userCurrencyRepository = new UserCurrencyRepository(userCurrencyDao);
         boosterChargeRepository = new BoosterChargeRepository(boosterChargeDao);
+        achievementRepository = new AchievementRepository(achievementDao);
 
         preferencesManager = new UserPreferencesManager(this);
         databaseInitializer = new DatabaseInitializer();
@@ -105,6 +110,10 @@ public class CardMasterApplication extends Application {
 
     public BoosterChargeRepository getBoosterChargeRepository() {
         return boosterChargeRepository;
+    }
+
+    public AchievementRepository getAchievementRepository() {
+        return achievementRepository;
     }
 
     public UserPreferencesManager getPreferencesManager() {
